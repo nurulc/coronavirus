@@ -45,13 +45,13 @@ The model core is an array of numbers, each cell represents a day from the start
 
 <img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
 
-The length of the array is the number of days from the start of the infection to the end. 
-The value is each call is the number of people at that stage of the infection. 
-The people is cell 0 are the ones initially infected.
- Each simulated day the vales of the cell is moved to the right (next cell index). 
-The value in the last cell is dropped, i.e. the person no longer has the illness.
- Newly infected people are added to cell 0.
- The number of deaths are so small that the simplifying assumption the dead are left in the array.
+1. The length of the array is the number of days from the start of the infection to the end. 
+1. The value is each call is the number of people at that stage of the infection. 
+1. The people is cell 0 are the ones initially infected.
+   1. Each simulated day the vales of the cell is moved to the right (next cell index). 
+1. The value in the last cell is dropped, i.e. the person no longer has the illness.
+   1. Newly infected people are added to cell 0.
+   1. The number of deaths are so small that the simplifying assumption the dead are left in the array.
 
 ## The stages of infection
 Note: *a parameter is coloured in purple. These values can be adjusted to match known values (more of this will be explained later).*
