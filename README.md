@@ -1,6 +1,5 @@
 # CoronaVirus Modeler
-*Nurul Choudhury*
-
+*Nurul Choudhury* <br>
 *Jan 31, 2020*
 
 
