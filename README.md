@@ -12,6 +12,8 @@ This article describes a coronavirus infection modeller, that will describe how 
 
 The model has a great number of options that you can try setting and look at the results. It allows you to perform what if analysis. 
 
+ <img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
+ 
 1. I have set those parameters to try and match as closely a possible the data from the model and the actual numbers coming out of China.
 1. The recently published report in Lancet that suggests that there are 75,000 infections as of Jan 25th seems to correspond to the resulst from my model. 
 1. If you do not believe those numbers you can adjust any of those oarameters.
