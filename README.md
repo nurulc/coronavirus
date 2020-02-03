@@ -24,7 +24,7 @@ The model has a great number of options that you can try setting and look at the
 4. Alter the rate of spread of the infection
 5. Adjust the lockdown date to see what inpact that would have on the results
 6. The code is availabe (you have to know Javascript) as a jsfiddle.net so if you want you and alter the model
-<img src="" >
+<img src="coronavirus_model.PNG" >
 ## Introduction
 
 Unless you have been living under a rock you will be aware about the panic surrounding the Novel Coronavirus (2019-nCoV)  pandemic origination from Hubei province in China, and in particular originating in Wuhan, the capital city of Hubei. The city is in complete lockdown since Jan 23rd. This was done to contain the epidemic and prevent further spread of the virus throughout the rest of China and the world. I will not discuss much further details since this is very well documented by the news media and the internet.
