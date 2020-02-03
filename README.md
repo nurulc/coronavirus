@@ -42,7 +42,7 @@ We do not know how many days from the initial infection to full recovery (no lon
 The main objective of the model is to keep it as simple as possible while still providing useful and fairly accurate results. So many simplifying assumptions are made and they will be explained as to get to them.
 
 The model core is an array of numbers, each cell represents a day from the start of the infection. 
-
+<img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
 
 
 The length of the array is the number of days from the start of the infection to the end. 
