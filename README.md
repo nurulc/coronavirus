@@ -7,6 +7,22 @@
 This article describes a coronavirus infection modeller, that will describe how the model works. The model makes many assumptions and contains many tunable parameters. The main purpose of the document is to understand the model details, give access to the model on a web page, and allow anybody to play with the model and adjust any of the parameters. Further the complete live editable of the model is available for anybody to change  or improve the model as more information becomes available. 
 
 [Go to the modeler](https://nurulc.github.io/coronavirus.html)
+
+### What can the model do
+
+The model has a great number of options that you can try setting and look at the results. It allows you to perform what if analysis. 
+
+1. I have set those parameters to try and match as closely a possible the data from the model and the actual numbers coming out of China.
+1. The recently published report in Lancet that suggests that there are 75,000 infections as of Jan 25th seems to correspond to the resulst from my model. 
+1. If you do not believe those numbers you can adjust any of those oarameters.
+1. Compare the real number of people infected (as produced by the simulation) and the reported number
+   1. You can adjust those parameters to see the impact
+2. Compare the official numbers against the numbers from the simulation
+3. China has locked down Hubei/Wuhan the model let you see how effective is the lockdown
+4. Alter the rate of spread of the infection
+5. Adjust the lockdown date to see what inpact that would have on the results
+6. The code is availabe (you have to know Javascript) as a jsfiddle.net so if you want you and alter the model
+
 ## Introduction
 
 Unless you have been living under a rock you will be aware about the panic surrounding the Novel Coronavirus (2019-nCoV)  pandemic origination from Hubei province in China, and in particular originating in Wuhan, the capital city of Hubei. The city is in complete lockdown since Jan 23rd. This was done to contain the epidemic and prevent further spread of the virus throughout the rest of China and the world. I will not discuss much further details since this is very well documented by the news media and the internet.
