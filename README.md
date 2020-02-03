@@ -2,9 +2,10 @@
 __Nurul Choudhury__
 __Jan 31, 2020__
 
+
 ## Summary
 This article describes a coronavirus infection modeller, that will describe how the model works. The model makes many assumptions and contains many tunable parameters. The main purpose of the document is to understand the model details, give access to the model on a web page, and allow anybody to play with the model and adjust any of the parameters. Further the complete live editable of the model is available for anybody to change  or improve the model as more information becomes available. 
-Introduction
+## Introduction
 
 Unless you have been living under a rock you will be aware about the panic surrounding the Novel Coronavirus (2019-nCoV)  pandemic origination from Hubei province in China, and in particular originating in Wuhan, the capital city of Hubei. The city is in complete lockdown since Jan 23rd. This was done to contain the epidemic and prevent further spread of the virus throughout the rest of China and the world. I will not discuss much further details since this is very well documented by the news media and the internet.
 
@@ -34,6 +35,7 @@ The source of the epidemic is believed to be at a large seafood and live animal 
    1. It is reported that the hospitals in Wuhan and Hubei are so overwhelmed that staff have asked the public seek hospital treatment only if they are ‘almost dying’. 
 Coronavirus is only being reported after confirmation test have verified it. We must estimate what percent of the infected population are going to the hospital and have been tested  (a parameter in the model).
 We do not know how many days from the initial infection to full recovery (no longer able to transmit the disease). This too is a parameter in the model.
+
 ## The Model
 The main objective of the model is to keep it as simple as possible while still providing useful and fairly accurate results. So many simplifying assumptions are made and they will be explained as to get to them.
 
