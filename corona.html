@@ -1,0 +1,423 @@
+
+
+<!-- 
+  Bootstrap docs: https://getbootstrap.com/docs
+-->
+<script>
+window.baseOptions = {
+    // Model parameters
+    initial: 63, // initial people infected
+    daysOfSickness: 20, // days from infection to well or death
+    becomeSpreader: 4, // days after infection you become a spreader
+
+    daysAsSpreader: 6, // how many days you a spreader can infect new people before he/she gets too sick to spread
+    symptomsAppear: 9, // days after infection visible symptoms appear (recognized as beeing infected)
+
+    // Simulation parameters
+    infectPerDay: 2.03, // how may people a spreader infects every day
+    percentRecorded: 0.02, // percent of people who are sick that are identified
+    lockdown: 28, // day of lockdown from original start date
+    spreadReduction: 0.96, // reduction in spreading after lockdown
+    administrativeDelay: 2, // days after symptom appears and person at hospital authorities record
+    dateAdjust: 33, // alligh the sickness daily list to align with actual statistics date
+    showReal: 0,
+    official: 1,
+    simulated: 1,
+    isLog: 0,
+    newCases: 1,
+    ticks: 4
+
+  };
+</script>
+<div class="container-fluid">
+  <div class="row ">
+    <div class="col-md-4">
+      <div class="page-header">
+        <!-- <a href="http://bit.ly/3b6zq2b">Link to interface builder</a> -->
+        <h1>
+          Coronavirus Infection Modeler
+        </h1>
+      </div>
+      <address>
+        <strong>Nurul Choudhury</strong> 
+        <div class="my-tooltip text-right"><small class="link text-muted" data-toggle="collapse" data-target="#writeup"> Read Modeler's Full Writeup </small><br>
+            <span class="my-tooltiptext">click here to read full description of the model and how it works</span>
+
+       </div>
+       <br>Jan 31, 2020
+      </address>
+
+    </div>
+    <div class="col-md-8">
+       <h2>
+        <span>Summary</span>
+      </h2>
+      <p>
+        <span>This is a coronavirus infection modeller. The model makes many assumptions and contains many tunable parameters. This is an infection modeler and allow anybody to play with the model and adjust any of the parameters. Further the complete live editable of the model is available for anybody to change or improve the model as more information becomes available.</span> &nbsp;<a href="https://github.com/nurulc/coronavirus/blob/master/README.md" target="_blank">More details here</a>
+      </p>     
+    </div>
+  </div>
+  <div class="row collapse" id="writeup">
+    <div class="col-md-12">
+  
+
+
+      <h1>
+        <span>Introduction</span>
+      </h1>
+      <p>
+        <span><strong id="docs-internal-guid-86a6c69a-7fff-ee83-870a-2ecd18490dc0"></strong></span>
+      </p>
+      <p>
+        <span>Unless you have been living under a rock you will be aware about the panic surrounding the Novel Coronavirus (2019-nCoV) pandemic origination from Hubei province in China, and in particular originating in Wuhan, the capital city of Hubei. The city is in complete lockdown since Jan 23rd. This was done to contain the epidemic and prevent further spread of the virus throughout the rest of China and the world. I will not discuss much further details since this is very well documented by the news media and the internet.</span>
+      </p>
+
+      <p>
+        <span>The problem has been that we the public have so little information to really understand what is really happening. Is there a real global danger and will the Chinese authorities successfully contain the problem. There appears to be a lot of fear, uncertainty, and doubt (FUD) that is making the whole world very nervous. With the very little hard information we have, can we estimate the dangers ahead.</span>
+      </p>
+
+      <p>
+        <span>In order to try to shed some light, I set out to model the behavior of the epidemic. In order to create any sort of model we first need to lay out the facts that we know, or think we know. Further, we also need to make some simplifying assumptions. So here is what I believe we know along with some assumptions:</span>
+      </p>
+
+      <ol>
+        <li>
+          <p role="presentation">
+            <span>The source of the epidemic is believed to be at a large seafood and live animal market.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>The initially infected people were directly infected at the market, but we do not know:</span>
+          </p>
+        </li>
+        <ol>
+          <li>
+            <p role="presentation">
+              <span>Model assumption</span><span>,</span> <em>all initial infections occurred in one place a one point in time.</em>
+            </p>
+          </li>
+          <li>
+            <p role="presentation">
+              <span>How many people were infected</span><span>? (</span><em>a parameter in the model</em><span>)</span>
+            </p>
+          </li>
+          <li>
+            <p role="presentation">
+              <span>Over what period did the infection occur? (see assumption above)</span>
+            </p>
+          </li>
+          <li>
+            <p role="presentation">
+              <span>Was it the only source of infection</span><span>:</span>
+            </p>
+          </li>
+          <ol>
+            <li>
+              <p role="presentation">
+                <span>Only animal to human?</span> <span>NO</span>
+              </p>
+            </li>
+            <li>
+              <p role="presentation">
+                <span>From other locations?</span> <span>NO</span> <span>(model assumption)</span>
+              </p>
+            </li>
+          </ol>
+        </ol>
+        <li>
+          <p role="presentation">
+            <span>At first it was thought that human to human transmission may not happen, but now we know the following:</span>
+          </p>
+        </li>
+        <ol>
+          <li>
+            <p role="presentation">
+              <span>People to people transmission absolutely happens (Strong factual evidence)</span>
+            </p>
+          </li>
+          <li>
+            <p role="presentation">
+              <span>The transmission rate is very high:</span>
+            </p>
+          </li>
+          <ol>
+            <li>
+              <p role="presentation">
+                <span>What is the transmission rate?</span> <span>(</span><em>a parameter in the model</em><span>)</span>
+              </p>
+            </li>
+          </ol>
+          <li>
+            <p role="presentation">
+              <span>Worse still the transmission happens before the symptoms appear</span>
+            </p>
+          </li>
+          <ol>
+            <li>
+              <p role="presentation">
+                <span>We do not know how soon after infection transmission can occur?</span> <em>(a parameter in the model</em><span>)</span>
+              </p>
+            </li>
+          </ol>
+        </ol>
+        <li>
+          <p role="presentation">
+            <span>It is thought the time from infection to visible symptoms is 9 days (</span><em>a parameter in the model</em><span>)</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>How long after full symptoms is an infected person a transmitter, since they are probably immobile and can only infect family members. Since family members are probably already infected,</span> <span>we assume a person with full symptoms stop being a transmitter after some short number of days</span> <em>(a parameter in the model</em><span>).</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>Many believe that China is under reporting the number of infected individuals. This is highly likely, not because of nefarious reason, but because:</span>
+          </p>
+        </li>
+        <ol>
+          <li>
+            <p role="presentation">
+              <span>It is reported that the hospitals in Wuhan and Hubei are so overwhelmed that staff have asked the public seek hospital treatment only if they are ‘</span><em>almost dying</em><span>’.</span>
+            </p>
+          </li>
+          <li>
+            <p role="presentation">
+              <span>Coronavirus is only being reported after confirmation test have verified it. We must estimate what percent of the infected population are going to the hospital and have been tested (</span><em>a parameter in the model</em><span>).</span>
+            </p>
+          </li>
+          <li>
+            <p role="presentation">
+              <span>We do not know how many days from the initial infection to full recovery (no longer able to transmit the disease). This too is</span> <em>a parameter in the model</em><em>.</em>
+            </p>
+          </li>
+        </ol>
+      </ol>
+      <h1>
+        <span>The Model</span>
+      </h1>
+      <p>
+        <span>The main objective of the model is to keep it as simple as possible while still providing useful and fairly accurate results. So many simplifying assumptions are made and they will be explained as to get to them.</span>
+      </p>
+
+      <p>HTML
+        <span>The model core is an array of numbers, each cell represents a day from the start of the infection.</span>
+      </p>
+
+      <ol>
+        <li>
+          <p role="presentation">
+            <span>The length of the array is the number of days from the start of the infection to the end.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>The value is each call is the number of people at that stage of the infection.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>The people is cell 0 are the ones initially infected.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>Each simulated day the vales of the cell is moved to the right (next cell index).</span>
+          </p>
+        </li>
+        <ol>
+          <li>
+            <p role="presentation">
+              <span>The value in the last cell is dropped, i.e. the person no longer has the illness.</span>
+            </p>
+          </li>
+          <li>
+            <p role="presentation">
+              <span>Newly infected people are added to cell 0.</span>
+            </p>
+          </li>
+        </ol>
+        <li>
+          <p role="presentation">
+            <span>The number of deaths are so small that the simplifying assumption the dead are left in the array.</span>
+          </p>
+        </li>
+      </ol>
+
+      <h2>
+        <span>The stages of infection</span>
+      </h2>
+      <p>
+        <span>Note: a parameter is coloured in</span> <span>purple.</span> <span>These values can be adjusted to match known values (more of this will be explained later).</span>
+      </p>
+
+      <ol>
+        <li>
+          <p role="presentation">
+            <span>Newly infected people - in cell 0</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>People in cell</span> <em>becomeSpreader -</em> <span>can transmit infection to others. This value is a parameter we can set.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>The parameter</span> <span>daysAsSpreader</span> <span>for how many days the infected person can spread the infection to others. So all the people from cells</span> <em>becomeSpreader</em> <span>to (</span><em>becomeSpreader + daysAsSpreader - 1)</em> <span>can create new infections. This period is known as</span> <span>spread period</span><span>. A person must be a spreader at least until they are at the visible symptoms (</span><em>symptomsAppear</em><span>) day. Although this restriction is not enforced in the model.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>The number of people each person in the spread period cells is given by the parameter</span> <em>infectPerDay</em><span>. So the number of new infections per simulated day is given by the total number of people in the spread period cells (</span><em>infectiousPeople</em><span>) times</span> <em>infectPerDay</em><span>.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>The cell (day)</span> <em>symptomsAppear</em> <span>is when the infected person shows visible symptoms, i.e. the person feels sick and knows he or she is ill.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>The next cell is the number of days (</span><em>administrativeDelay</em><span>) from</span> <em>symptomsAppear</em> <span>to the infection being recorded by the authorities.</span>
+          </p>
+        </li>
+        <li>
+          <p role="presentation">
+            <span>Since we know not everybody that can be recorded is not so we have another parameter (</span>
+          </p>
+        </li>
+      </ol>
+
+<img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
+<!--<svg viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .small { font: italic 13px sans-serif; }
+    .heavy { font: bold 30px sans-serif; }
+
+    /* Note that the color of the text is set with the    *
+     * fill property, the color property is for HTML only */
+    .Rrrrr { font: italic 40px serif; fill: red; }
+  </style>
+
+  <text x="20" y="35" class="small">My</text>
+  <text x="40" y="35" class="heavy">cat</text>
+  <text x="55" y="55" class="small">is</text>
+  <text x="65" y="55" class="Rrrrr">Grumpy!</text>
+</svg> -->
+   </div>
+  </div>
+</div>
+<div class="my-tooltip text-right">
+  <span>Fit Error against official data: &nbsp;</span><span id="error_val" class="font-weight-bold red"></span>
+  <span> &nbsp; adjust the sliders to make this value as small as possible.</span>
+  <span class="my-tooltiptext ">To redece the value below (in red), the suggested items to adjust are, infectPerDay, spreadReduction, and Initially infected</span>
+</div>
+<div class="row">
+  <div class="col-md-12" id="model_target">
+    
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.13.0/d3.js" ></script>
+<div class="my-tooltip text-right">
+ <small class="link  green" >Official Reported Infections:</small> &nbsp; <input type="checkbox" id="official" checked>
+     <span class="my-tooltiptext ">Show the official data reported by China</span>
+</div>
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<script>
+   var __official =  document.getElementById("official");
+        __official.onchange = function() {
+       updateData("official", __official.checked?1:0);
+   }
+</script>
+
+<div class="my-tooltip text-right">
+ <small class="link  blue" > Show Reported Infections:</small> &nbsp; <input type="checkbox" id="simulated" checked>
+     <span class="my-tooltiptext ">Show the reported (simulated) infections</span>
+</div>
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<script>
+   var __simulated =  document.getElementById("simulated");
+      __simulated.onchange = function() {
+       updateData("simulated", __simulated.checked?1:0);
+   }
+</script>
+<div class="my-tooltip text-right">
+ <small class="link  red" > Show Real Infections:</small> &nbsp; <input type="checkbox" id="showReal" checked>
+     <span class="my-tooltiptext ">Show the real (simulated) infections as well as the reported. Turning this off shows the reported information more clearly</span>
+</div>
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<script>
+   var __showReal =  document.getElementById("showReal");
+      __showReal.onchange = function() {
+       updateData("showReal", __showReal.checked?1:0);
+   }
+</script>
+&nbsp;&nbsp;&nbsp;&nbsp;
+<div class="my-tooltip text-right">
+ <small class="link" >Show Log Scale Y(Infected):</small> &nbsp; <input type="checkbox" id="showLog" >
+     <span>Click on to the log scale show information more clearly, but visually less impressive</span>
+     <span class="my-tooltiptext ">Show Vertical Axix Log scale, this is good for showing data where there are both small values and very large values</span>
+</div>
+&nbsp;&nbsp;&nbsp;&nbsp;
+
+<script>
+   var __showLog =  document.getElementById("showLog");
+      __showLog.onchange = function() {
+       updateData("isLog", __showLog.checked?1:0);
+   }
+</script>
+<div id="interface" >
+
+<!--  REMOVE THIS -->
+<div class="row">
+<div class="col-md-4"><div class="my-tooltip">infectPerDay<span id="infectPerDay_val" class="my-bold-text">216</span> (infectPerDay)<span class="my-tooltiptext"> How may people a spreader infects every day</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="0" max="1000" value="230" class="my-slider" id="infectPerDay_slider" name="infectPerDay"><p></p></div><script>(function(){var slider =  document.getElementById("infectPerDay_slider");var output = document.getElementById("infectPerDay_val");output.innerHTML = (+slider.value)*0.01;slider.oninput = function() {output.innerHTML = this.value*0.01;updateData("infectPerDay", (+this.value),0.01);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">Spreader Day<span id="becomeSpreader_val" class="my-bold-text">4</span> (becomeSpreader)<span class="my-tooltiptext">Days after infection you become a spreader</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="0" max="15" value="4" class="my-slider" id="becomeSpreader_slider" name="becomeSpreader"><p></p></div><script>(function(){var slider =  document.getElementById("becomeSpreader_slider");var output = document.getElementById("becomeSpreader_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("becomeSpreader", (+this.value),1);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">Days as Spreader<span id="daysAsSpreader_val" class="my-bold-text">6</span> (daysAsSpreader)<span class="my-tooltiptext">How many days you a spreader can infect new people before he/she gets too sick to spread</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="2" max="15" value="6" class="my-slider" id="daysAsSpreader_slider" name="daysAsSpreader"><p></p></div><script>(function(){var slider =  document.getElementById("daysAsSpreader_slider");var output = document.getElementById("daysAsSpreader_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("daysAsSpreader", (+this.value),1);}})();</script></div> <!-- end --></div>
+<div class="row">
+<div class="col-md-4"><div class="my-tooltip">Symptoms Appear<span id="symptomsAppear_val" class="my-bold-text">9</span> (symptomsAppear)<span class="my-tooltiptext">Days after infection visible symptoms appear (recognized as beeing infected)</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="5" max="15" value="9" class="my-slider" id="symptomsAppear_slider" name="symptomsAppear"><p></p></div><script>(function(){var slider =  document.getElementById("symptomsAppear_slider");var output = document.getElementById("symptomsAppear_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("symptomsAppear", (+this.value),1);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">percentRecorded<span id="percentRecorded_val" class="my-bold-text">2</span> (percentRecorded)<span class="my-tooltiptext"> percent of people who are sick that are identified</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="0" max="100" value="2" class="my-slider" id="percentRecorded_slider" name="percentRecorded"><p></p></div><script>(function(){var slider =  document.getElementById("percentRecorded_slider");var output = document.getElementById("percentRecorded_val");output.innerHTML = (+slider.value)*0.01;slider.oninput = function() {output.innerHTML = this.value*0.01;updateData("percentRecorded", (+this.value),0.01);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">lockdown<span id="lockdown_val" class="my-bold-text">28</span> (lockdown)<span class="my-tooltiptext">Day of lockdown from original start date</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="0" max="100" value="28" class="my-slider" id="lockdown_slider" name="lockdown"><p></p></div><script>(function(){var slider =  document.getElementById("lockdown_slider");var output = document.getElementById("lockdown_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("lockdown", (+this.value),1);}})();</script></div> <!-- end --></div>
+<div class="row">
+<div class="col-md-4"><div class="my-tooltip">administrativeDelay<span id="administrativeDelay_val" class="my-bold-text">2</span> (administrativeDelay)<span class="my-tooltiptext">Days after symptom appears and person at hospital authorities record</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="0" max="10" value="2" class="my-slider" id="administrativeDelay_slider" name="administrativeDelay"><p></p></div><script>(function(){var slider =  document.getElementById("administrativeDelay_slider");var output = document.getElementById("administrativeDelay_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("administrativeDelay", (+this.value),1);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">Lockdown reduction<span id="spreadReduction_val" class="my-bold-text">99</span> (spreadReduction)<span class="my-tooltiptext">How effective was the lockdown - Reduction in spreading after lockdown</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="0" max="100" value="99" class="my-slider" id="spreadReduction_slider" name="spreadReduction"><p></p></div><script>(function(){var slider =  document.getElementById("spreadReduction_slider");var output = document.getElementById("spreadReduction_val");output.innerHTML = (+slider.value)*0.01;slider.oninput = function() {output.innerHTML = this.value*0.01;updateData("spreadReduction", (+this.value),0.01);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">Initially infected<span id="initial_val" class="my-bold-text">60</span> (initial)<span class="my-tooltiptext">initial people infected</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="1" max="200" value="60" class="my-slider" id="initial_slider" name="initial"><p></p></div><script>(function(){var slider =  document.getElementById("initial_slider");var output = document.getElementById("initial_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("initial", (+this.value),1);}})();</script></div> <!-- end --></div>
+<div class="row">
+<div class="col-md-4"><div class="my-tooltip">Days of Sickness<span id="daysOfSickness_val" class="my-bold-text">30</span> (daysOfSickness)<span class="my-tooltiptext">Days from infection to well (no longer a spreader)</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="13" max="100" value="30" class="my-slider" id="daysOfSickness_slider" name="daysOfSickness"><p></p></div><script>(function(){var slider =  document.getElementById("daysOfSickness_slider");var output = document.getElementById("daysOfSickness_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("daysOfSickness", (+this.value),1);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">dateAdjust<span id="dateAdjust_val" class="my-bold-text">33</span> (dateAdjust)<span class="my-tooltiptext">Align the sickness daily list to align with actual statistics date</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="0" max="100" value="33" class="my-slider" id="dateAdjust_slider" name="dateAdjust"><p></p></div><script>(function(){var slider =  document.getElementById("dateAdjust_slider");var output = document.getElementById("dateAdjust_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("dateAdjust", (+this.value),1);}})();</script></div> <!-- end -->
+<div class="col-md-4"><div class="my-tooltip">ticks<span id="ticks_val" class="my-bold-text">4</span> (ticks)<span class="my-tooltiptext">chart tick count</span></div><div>&nbsp;</div><div class="my-slidecontainer"><input type="range" min="2" max="6" value="4" class="my-slider" id="ticks_slider" name="ticks"><p></p></div><script>(function(){var slider =  document.getElementById("ticks_slider");var output = document.getElementById("ticks_val");output.innerHTML = (+slider.value)*1;slider.oninput = function() {output.innerHTML = this.value*1;updateData("ticks", (+this.value),1);}})();</script></div> <!-- end --></div>
+<!-- END REMOVE -->
+</div>
+<div id='graph' class="row">
+  <div id="graph_area" class="col-md-12">
+  Hi
+    <svg id="svgLine" width="800" height="400" />
+  </div>
+</div>
+<div id="controls" class="row">
+  <div class="slidecontainer">
+
+  </div>
+</div>
+
+<script>
+  //setUp();
+  // Get the last <li> element ("Milk") of <ul> with id="myList2"
+  var itm = document.getElementById("model");
+
+// Copy the <li> element and its child nodes
+  var htmlText = itm.outerHTML;
+  
+  //console.log("here i am: "+htmlText)
+
+// Append the cloned <li> element to <ul> with id="myList1"
+document.getElementById("graph_area").innerHTML = htmlText;
+</script>
+
