@@ -17,7 +17,7 @@ This article describes a coronavirus infection modeller, that will describe how 
 1. The astonishing fact the model suggests that the real number of new infections originating from a single infected person is 2 per day for the 6 days they are active spreader - 12 people. This is not what we are hearing in the news but is was the only way to make all the numbers work with the data so far. This also reflect the observation from Germany where a woman went to a conference for 2 days and infected 4 people. Apperently she was not sick at all dering her time in Germany.
 1. For the Wuhan lockdown to work, it has to be 96% effective for the pandemic to be brought under control, a back of the envelope calculation suggests that this may be possible. That means that after the lockdown one in fourty infected person is spreading it to one other person. This may sould like a lot but since most people are no longer meeting new people the virus spread is severly curtailed.
 1. he total number of infected people (both reported and unreported) may well be close to 1 million as of today (Feb 3rd). 
-1. THE GOOD NEWS the model suggests that thing should be under control by Feb 10th to 15th. 
+1. THE GOOD NEWS the model suggests that thing should be under control by Feb 15th to 120th, and Wuhan quarantine can be lifted in mid March. 
 
 ### What can the model do
 
