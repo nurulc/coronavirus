@@ -8,6 +8,17 @@ This article describes a coronavirus infection modeller, that will describe how 
 
 [Go to the modeler](https://nurulc.github.io/coronavirus.html)
 
+### The takeaway from the model:
+
+1. The models parameters (there quite a few) were adjusted to track the reported numbers coming out of China.
+2. Only 2% if the infected people are being reported. This is probably because only the very sick go to the hospital because they are so crowded. Because of insufficient testing kits only the most likely candidates are being tested. Finally only the people tested and found positive are being reported.
+1. Once infected a person can spread the infection after 4 days but full symptoms do not show up until 9 days after the initial infection
+1. An infected person spreads the infection for 6 days and at that point they are too sick to significantly spread to more people (they have already infected those who would be care givers)
+1. The astonishing fact the model suggests that the real number of new infections originating from a single infected person is 2 per day for the 6 days they are active spreader - 12 people. This is not what we are hearing in the news but is was the only way to make all the numbers work with the data so far. This also reflect the observation from Germany where a woman went to a conference for 2 days and infected 4 people. Apperently she was not sick at all dering her time in Germany.
+1. For the Wuhan lockdown to work, it has to be 96% effective for the pandemic to be brought under control, a back of the envelope calculation suggests that this may be possible.
+1. he total number of infected people (both reported and unreported) may well be close to 1 million as of today (Feb 3rd). 
+1. THE GOOD NEWS the model suggests that thing should be under control by Feb 10th to 15th. 
+
 ### What can the model do
 
 The model has a great number of options that you can try setting and look at the results. It allows you to perform what if analysis. 
