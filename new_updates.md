@@ -14,6 +14,6 @@ the lockdown reduction rate had to be revised down to 90%.  The method for deter
 
 The other thing to consider is the slope of the officil data  and the simulation data. The slopes should closely match. 
 
-![Slope of official and predicted](official_model.PNG)
+![Slope of official and predicted](official_model.png)
 
 Currently the modeller does not give the difference as a number.
