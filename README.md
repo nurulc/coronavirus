@@ -1,12 +1,12 @@
-# CoronaVirus Modeler
+# CoronaVirus Modeling Tool
 *Nurul Choudhury* <br>
 *Jan 31, 2020*
 
 
 ## Summary
-This article describes a coronavirus infection modeller, that will describe how the model works. The model makes many assumptions and contains many tunable parameters. The main purpose of the document is to understand the model details, give access to the model on a web page, and allow anybody to play with the model and adjust any of the parameters. Further the complete live editable of the model is available for anybody to change  or improve the model as more information becomes available. 
+This article describes a coronavirus infection modeling tool, that will describe how the model works. The model makes many assumptions and contains many tunable parameters. The main purpose of the document is to understand the model details, give access to the model on a web page, and allow anybody to play with the model and adjust any of the parameters. Further the complete live editable of the model is available for anybody to change  or improve the model as more information becomes available. 
 
-[Go to the modeler](https://nurulc.github.io/coronavirus.html)
+[Go to the modeling Tool](https://nurulc.github.io/coronavirus.html)
 
 ### The takeaway from the model:
 
