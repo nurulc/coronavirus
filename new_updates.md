@@ -1,7 +1,12 @@
 # CoronaVirus Modeler Updates / News
 *Nurul Choudhury* <br>
 
+## Update 2020-02-06
 
+## Official Count
+
+*2020-02-05*  **28365**
+The model predicted this value without any changes to the parameters. This suggests that the model is tracking accurately.
 
 ## Update 2020-02-05
 
