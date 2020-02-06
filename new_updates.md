@@ -12,6 +12,19 @@ The model predicted this value without any changes to the parameters. This sugge
 
 As new data arrives I have been updating the model parameters (the actual model is unchanged).
 
+|Key|Value|
+|initial|63|
+|daysOfSickness|20|
+|becomeSpreader|4|
+|daysAsSpreader|6|
+|symptomsAppear|9|
+|infectPerDay|2.03|
+|percentRecorded|0.02|
+|lockdown|28|
+|spreadReduction|0.9|
+|administrativeDelay|2|
+|dateAdjust|33|
+
 ## Official Count
 
 *2020-02-04*  **24,641**
