@@ -11,6 +11,7 @@ Note: This is not a correlation model, but actually starts from first principles
 
 There are lots of assumptions and guesswork as to the parameters for the model, but so far the model is corresponding very closely to the actual official data. Its has been tracking well since last Friday with virtually no tweaks to the parameters and absolutely no changes to the underlying model. 
 
+Coronavirus Infection spread predictor/model
 Description https://github.com/nurulc/coronavirus/blob/master/README.md
 Modeler here: https://nurulc.github.io/coronavirus.html
 
