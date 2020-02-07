@@ -1,9 +1,16 @@
 # CoronaVirus Modeler Updates / News
 *Nurul Choudhury* <br>
 
-## Update 2020-02-06
+## Update 2020-02-07
 
 ## Official Count
+
+*2020-02-05*  **31481**
+The model predicted tracking accurately with any parameter adjustments.
+
+## Update 2020-02-06
+
+### Official Count
 
 *2020-02-05*  **28365**
 The model predicted this value without any changes to the parameters. This suggests that the model is tracking accurately.
@@ -25,7 +32,7 @@ As new data arrives I have been updating the model parameters (the actual model 
 |administrativeDelay|2|
 |dateAdjust|33|
 
-## Official Count
+### Official Count
 
 *2020-02-04*  **24,641**
 
