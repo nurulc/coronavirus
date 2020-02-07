@@ -1,12 +1,20 @@
-# CoronaVirus Modeler
+# CoronaVirus Modeling Tool
 *Nurul Choudhury* <br>
 *Jan 31, 2020*
 
 
 ## Summary
-This article describes a coronavirus infection modeller, that will describe how the model works. The model makes many assumptions and contains many tunable parameters. The main purpose of the document is to understand the model details, give access to the model on a web page, and allow anybody to play with the model and adjust any of the parameters. Further the complete live editable of the model is available for anybody to change  or improve the model as more information becomes available. 
+The coronavirus infection in Wuhan China is frightening but how bad is it really. This article describes a coronavirus infection modeling tool, that will describe how the model works. The model tries to answer some simple questions:
 
-[Go to the modeler](https://nurulc.github.io/coronavirus.html)
+1. How bad is it going to get
+2. When awill things start to stabalize
+3. How effective was the lockdown of Wuhan city and Hubei province
+4. We know how many people ar being reported to be infected (official), but how may people are really infected
+5. How well does the model match the official numbers
+
+The model makes many assumptions and contains many tunable parameters. The main purpose of the document is to understand the model details, give access to the model on a web page, and allow anybody to play with the model and adjust any of the parameters. Further the complete live editable of the model is available for anybody to change  or improve the model as more information becomes available. 
+
+[Go to the modeling Tool](https://nurulc.github.io/coronavirus.html)
 
 ### The takeaway from the model:
 
@@ -89,7 +97,9 @@ Note: *a parameter is coloured in purple. These values can be adjusted to match 
 2. People in cell **becomeSpreader** - can transmit infection to others. This value is a parameter we can set.
 3. The parameter **daysAsSpreader** for how many days the infected person can spread the infection to others. So all the people from cells **becomeSpreader** to (*becomeSpreader  + daysAsSpreader - 1*) can create new infections. This period is known as spread period. A person must be a spreader at least until they are at the visible symptoms (symptomsAppear) day. Although this restriction is not enforced in the model. 
 4. The number of people each person in the spread period cells is given by the parameter **infectPerDay**. So the number of new infections per simulated day is given by the total number of people in the spread period cells (*infectiousPeople*) times **infectPerDay**.
-5. The cell (day) **symptomsAppear** is when the infected person shows visible symptoms, i.e. the person feels sick and knows he or she is ill.
+5. The cell (day) **symptomsAppear** is when the infected person shows serious visible symptoms, i.e. the person feels sick and knows he or she is ill.
 6. The next cell is the number of days (**administrativeDelay**) from *symptomsAppear* to the infection being recorded by the authorities.
-6. Since we know not everybody that can be recorded is not so we have another parameter (
+7. Since we know not everybody that can be recorded is not so we have another parameter (**percentRecorded**)
+8. How effective was the lockdown in reducing the spread of the virus (**spreadReduction**)
+9. How long until from the initial infection until the person is better (**daysOfSickness**)
 
