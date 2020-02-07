@@ -16,4 +16,4 @@ Description https://github.com/nurulc/coronavirus/blob/master/README.md
 Modeler here: https://nurulc.github.io/coronavirus.html
 
 Nurul Choudhury
-+1 914 552 8899 (cell)
+552 8899 (cell)
