@@ -1,3 +1,10 @@
+body {
+   transform: scale(0.75);
+   transform-origin: 0 0;
+   padding-left: 2rem;
+   height: 200rem;
+}
+
 .row {
   background: #f8f9fa;
   margin-top: 20px;
@@ -26,28 +33,32 @@
   background: #d3d3d3; /* Grey background */
   outline: none; /* Remove outline */
   opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-  -webkit-transition: .2s; /* 0.2 seconds transition on hover */
-  transition: opacity .2s;
+  -webkit-transition: 0.2s; /* 0.2 seconds transition on hover */
+  transition: opacity 0.2s;
 }
 
-/* Mouse-over effects */
-.my-slider:hover {
-  opacity: 1; /* Fully shown on mouse-over */
-}
 
 .blue {
-  color: blue
+  color: darkcyan;
 }
 
 
 .red {
-  color: red
+  color: red;
 }
 
 .green {
-  color: green
+  color: green;
 }
+
+.official {
+  color: darkorange;
+  font-weight: 700;
+ /* background-color: steelblue;*/
+}
+
 /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+
 .my-slider::-webkit-slider-thumb {
   -webkit-appearance: none; /* Override default look */
   appearance: none;
@@ -63,6 +74,12 @@
   background: #4CAF50; /* Green background */
   cursor: pointer; /* Cursor on hover */
 }
+
+/* Mouse-over effects */
+.my-slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
 
 .my-tooltip {
   position: relative;
@@ -106,3 +123,32 @@
 .my-bold-text {
   text-shadow: 0.5px 0.5px #666;
 }
+
+.legendOrdinal {
+  font-size: 75%;
+}
+.overlay-d3 {
+        fill: none;
+        pointer-events: all;
+}
+
+.focus-d3 circle {
+        fill: steelblue;
+}
+
+.focus-d3 text {
+        font-size: 14px;
+}
+
+.tooltip-d3 {
+        fill: white;
+        stroke: #000;
+ }
+ 
+ .tooltip-label {
+    color: green;
+ }
+
+ .tooltip-d3-date, .tooltip-d3-value .tooltip-d3-realValue .tooltip-d3-newCases .tooltip-d3-official {
+        font-weight: bold;
+  }
