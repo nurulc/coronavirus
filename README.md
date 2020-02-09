@@ -43,6 +43,10 @@ The model has a great number of options that you can try setting and look at the
 4. Alter the rate of spread of the infection
 5. Adjust the lockdown date to see what inpact that would have on the results
 6. The code is availabe (you have to know Javascript) as a jsfiddle.net so if you want you and alter the model
+
+### Convayor Belt Model
+
+![Infection Conveyor Belt Model](conveyor.gif)
 <img src="coronavirus_model.PNG" >
 ## Introduction
 
