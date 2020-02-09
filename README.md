@@ -29,7 +29,19 @@ The model makes many assumptions and contains many tunable parameters. The main 
 
 ### What can the model do
 
-The model has a great number of options that you can try setting and look at the results. It allows you to perform what if analysis. 
+The model has a great number of options that you can try setting and look at the results. It allows you to perform what if analysis.
+### Convayor Belt Model
+
+![Infection Conveyor Belt Model](conveyor.gif)
+
+Each new infection (person) moves along the desease progress conveyor. 
+
+1. Become infected
+2. Become spreader (infect others not already infected)
+3. Serious symtoms appear
+4. Stop spreading
+5. Some of the infected are recorded by the authorities. 
+6. Body fights back infector and all is well, or sadly the persone surcomes to the infection (death)
 
  <img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
  
@@ -44,9 +56,7 @@ The model has a great number of options that you can try setting and look at the
 5. Adjust the lockdown date to see what inpact that would have on the results
 6. The code is availabe (you have to know Javascript) as a jsfiddle.net so if you want you and alter the model
 
-### Convayor Belt Model
 
-![Infection Conveyor Belt Model](conveyor.gif)
 <img src="coronavirus_model.PNG" >
 ## Introduction
 
