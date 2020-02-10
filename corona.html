@@ -15,38 +15,36 @@
   <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
   <link href="corona.css" rel="stylesheet">
 
- <!-- 
+<!-- 
   Bootstrap docs: https://getbootstrap.com/docs
 -->
-  <script>
-  window.baseOptions = {
-      // Model parameters
-      initial: 63, // initial people infected
-      daysOfSickness: 20, // days from infection to well or death
-      becomeSpreader: 4, // days after infection you become a spreader
+<script>
+window.baseOptions = {
+    // Model parameters
+    initial: 63, // initial people infected
+    daysOfSickness: 20, // days from infection to well or death
+    becomeSpreader: 4, // days after infection you become a spreader
 
-      daysAsSpreader: 6, // how many days you a spreader can infect new people before he/she gets too sick to spread
-      symptomsAppear: 9, // days after infection visible symptoms appear (recognized as beeing infected)
+    daysAsSpreader: 6, // how many days you a spreader can infect new people before he/she gets too sick to spread
+    symptomsAppear: 9, // days after infection visible symptoms appear (recognized as beeing infected)
 
-      // Simulation parameters
-      infectPerDay: 2.03, // how may people a spreader infects every day
-      percentRecorded: 0.02, // percent of people who are sick that are identified
-      lockdown: 28, // day of lockdown from original start date
-      spreadReduction: 0.90, // reduction in spreading after lockdown
-      administrativeDelay: 2, // days after symptom appears and person at hospital authorities record
-      dateAdjust: 33, // alligh the sickness daily list to align with actual statistics date
-      showReal: 0,
-      official: 1,
-      simulated: 1,
-      isLog: 1,
-      newCases: 1,
-      ticks: 4
+    // Simulation parameters
+    infectPerDay: 2.03, // how may people a spreader infects every day
+    percentRecorded: 0.02, // percent of people who are sick that are identified
+    lockdown: 28, // day of lockdown from original start date
+    spreadReduction: 0.90, // reduction in spreading after lockdown
+    administrativeDelay: 2, // days after symptom appears and person at hospital authorities record
+    dateAdjust: 33, // alligh the sickness daily list to align with actual statistics date
+    daysOfSimulation: 140,
+    showReal: 0,
+    official: 1,
+    simulated: 1,
+    isLog: 1,
+    newCases: 1,
+    ticks: 4
 
-    };
-  </script>
-</head>
-<body>
-
+  };
+</script>
 <div class="container-fluid">
   <div class="row ">
     <div class="col-md-4">
@@ -322,14 +320,36 @@
         </li>
       </ol>
 
-      <img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" width="200px" >
+<img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
+<!--<svg viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    .small { font: italic 13px sans-serif; }
+    .heavy { font: bold 30px sans-serif; }
+
+    /* Note that the color of the text is set with the    *
+     * fill property, the color property is for HTML only */
+    .Rrrrr { font: italic 40px serif; fill: red; }
+  </style>
+
+  <text x="20" y="35" class="small">My</text>
+  <text x="40" y="35" class="heavy">cat</text>
+  <text x="55" y="55" class="small">is</text>
+  <text x="65" y="55" class="Rrrrr">Grumpy!</text>
+</svg> -->
    </div>
   </div>
 </div>
-<div class="my-tooltip text-right">
-  <span>Fit Error against official data: &nbsp;</span><span id="error_val" class="font-weight-bold red"></span>
-  <span class="text-secondary"> &nbsp; adjust the sliders to make this value as small as possible.</span>
-  <span class="my-tooltiptext ">To redece the value below (in red), the suggested items to adjust are, infectPerDay, spreadReduction, and Initially infected</span>
+<div class="row">
+  <div class="my-tooltip  col-md-7">
+    <span>Fit Error against official data: &nbsp;</span><span id="error_val" class="font-weight-bold red"></span>
+    <span class="text-secondary"> &nbsp; adjust the sliders to make this value as small as possible.</span>
+    <span class="my-tooltiptext ">To redece the value below (in red), the suggested items to adjust are, infectPerDay, spreadReduction, and Initially infected</span>
+  </div>
+  <div class="col-md-2 text-right" id="scenario_div_title">
+    Select Scenario
+  </div>
+  <div class="col-md-3" id="scenario_div">
+  </div>
 </div>
 <div class="row">
   <div class="col-md-12" id="model_target">
@@ -404,7 +424,7 @@
 <!-- END REMOVE -->
 </div>
 <div id='graph' class="row">
-  <div id="graph_area" class="col-md-12" height="400px">
+  <div id="graph_area" class="col-md-12">
   Hi
     <svg id="svgLine" width="800" height="400" />
   </div>
