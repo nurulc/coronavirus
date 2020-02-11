@@ -345,6 +345,38 @@ window.baseOptions = {
   <div class="my-tooltip  col-md-7">
     <span>Fit Error against official data: &nbsp;</span><span id="error_val" class="font-weight-bold red"></span>
     <span class="text-secondary"> &nbsp; adjust the sliders to make this value as small as possible.</span>
+    <button type="button" class="btn-xs btn-outline-info" data-toggle="modal" data-target="#exampleModal">
+ Explain error
+    </button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>
+        
+        The error function is the RMS of official values and predicted lavues. Since we are dealing with exponential growth, a simple RMS would be too concerned about large values 
+        and put very little on the smaller values earlier in time. The best way to way to account for this is to take the log of the values. This gives a more balanced error function.
+        </p>
+        <p>
+        <i>More formally we get the equation:</i>
+        </p>
+        <img id="err_fn" src="https://nurulc.github.io/error.svg" alt="compute error" >
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+       
+      </div>
+    </div>
+  </div>
+</div>
     <span class="my-tooltiptext ">To redece the value below (in red), the suggested items to adjust are, infectPerDay, spreadReduction, and Initially infected</span>
   </div>
   <div class="col-md-2 text-right" id="scenario_div_title">
