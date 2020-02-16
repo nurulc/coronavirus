@@ -38,6 +38,7 @@ window.baseOptions = {
     susceptible: 10000000, // total number of people succeptable to infection
     maxNewInfection: 400000, // maximum new infection per day
     daysOfSimulation: 140,
+    reportingChange: 1.1, // increase in reporting
     showReal: 0,
     official: 1,
     simulated: 1,
@@ -90,267 +91,22 @@ window.baseOptions = {
      </div>
   </div>
   <div class="row collapse" id="writeup">
-    <div class="col-md-12">
-  
-
-
-      <h1>
-        <span>Introduction</span>
-      </h1>
-      <p>
-        <span><strong id="docs-internal-guid-86a6c69a-7fff-ee83-870a-2ecd18490dc0"></strong></span>
-      </p>
-      <p>
-        <span>Unless you have been living under a rock you will be aware about the panic surrounding the Novel Coronavirus (2019-nCoV) pandemic origination from Hubei province in China, and in particular originating in Wuhan, the capital city of Hubei. The city is in complete lockdown since Jan 23rd. This was done to contain the epidemic and prevent further spread of the virus throughout the rest of China and the world. I will not discuss much further details since this is very well documented by the news media and the internet.</span>
-      </p>
-
-      <p>
-        <span>The problem has been that we the public have so little information to really understand what is really happening. Is there a real global danger and will the Chinese authorities successfully contain the problem. There appears to be a lot of fear, uncertainty, and doubt (FUD) that is making the whole world very nervous. With the very little hard information we have, can we estimate the dangers ahead.</span>
-      </p>
-
-      <p>
-        <span>In order to try to shed some light, I set out to model the behavior of the epidemic. In order to create any sort of model we first need to lay out the facts that we know, or think we know. Further, we also need to make some simplifying assumptions. So here is what I believe we know along with some assumptions:</span>
-      </p>
-
-      <ol>
-        <li>
-          <p role="presentation">
-            <span>The source of the epidemic is believed to be at a large seafood and live animal market.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>The initially infected people were directly infected at the market, but we do not know:</span>
-          </p>
-        </li>
-        <ol>
-          <li>
-            <p role="presentation">
-              <span>Model assumption</span><span>,</span> <em>all initial infections occurred in one place a one point in time.</em>
-            </p>
-          </li>
-          <li>
-            <p role="presentation">
-              <span>How many people were infected</span><span>? (</span><em>a parameter in the model</em><span>)</span>
-            </p>
-          </li>
-          <li>
-            <p role="presentation">
-              <span>Over what period did the infection occur? (see assumption above)</span>
-            </p>
-          </li>
-          <li>
-            <p role="presentation">
-              <span>Was it the only source of infection</span><span>:</span>
-            </p>
-          </li>
-          <ol>
-            <li>
-              <p role="presentation">
-                <span>Only animal to human?</span> <span>NO</span>
-              </p>
-            </li>
-            <li>
-              <p role="presentation">
-                <span>From other locations?</span> <span>NO</span> <span>(model assumption)</span>
-              </p>
-            </li>
-          </ol>
-        </ol>
-        <li>
-          <p role="presentation">
-            <span>At first it was thought that human to human transmission may not happen, but now we know the following:</span>
-          </p>
-        </li>
-        <ol>
-          <li>
-            <p role="presentation">
-              <span>People to people transmission absolutely happens (Strong factual evidence)</span>
-            </p>
-          </li>
-          <li>
-            <p role="presentation">
-              <span>The transmission rate is very high:</span>
-            </p>
-          </li>
-          <ol>
-            <li>
-              <p role="presentation">
-                <span>What is the transmission rate?</span> <span>(</span><em>a parameter in the model</em><span>)</span>
-              </p>
-            </li>
-          </ol>
-          <li>
-            <p role="presentation">
-              <span>Worse still the transmission happens before the symptoms appear</span>
-            </p>
-          </li>
-          <ol>
-            <li>
-              <p role="presentation">
-                <span>We do not know how soon after infection transmission can occur?</span> <em>(a parameter in the model</em><span>)</span>
-              </p>
-            </li>
-          </ol>
-        </ol>
-        <li>
-          <p role="presentation">
-            <span>It is thought the time from infection to visible symptoms is 9 days (</span><em>a parameter in the model</em><span>)</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>How long after full symptoms is an infected person a transmitter, since they are probably immobile and can only infect family members. Since family members are probably already infected,</span> <span>we assume a person with full symptoms stop being a transmitter after some short number of days</span> <em>(a parameter in the model</em><span>).</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>Many believe that China is under reporting the number of infected individuals. This is highly likely, not because of nefarious reason, but because:</span>
-          </p>
-        </li>
-        <ol>
-          <li>
-            <p role="presentation">
-              <span>It is reported that the hospitals in Wuhan and Hubei are so overwhelmed that staff have asked the public seek hospital treatment only if they are ‘</span><em>almost dying</em><span>’.</span>
-            </p>
-          </li>
-          <li>
-            <p role="presentation">
-              <span>Coronavirus is only being reported after confirmation test have verified it. We must estimate what percent of the infected population are going to the hospital and have been tested (</span><em>a parameter in the model</em><span>).</span>
-            </p>
-          </li>
-          <li>
-            <p role="presentation">
-              <span>We do not know how many days from the initial infection to full recovery (no longer able to transmit the disease). This too is</span> <em>a parameter in the model</em><em>.</em>
-            </p>
-          </li>
-        </ol>
-      </ol>
-      <h1>
-        <span>The Model</span>
-      </h1>
-      <p>
-        <span>The main objective of the model is to keep it as simple as possible while still providing useful and fairly accurate results. So many simplifying assumptions are made and they will be explained as to get to them.</span>
-      </p>
-
-      <p>HTML
-        <span>The model core is an array of numbers, each cell represents a day from the start of the infection.</span>
-      </p>
-
-      <ol>
-        <li>
-          <p role="presentation">
-            <span>The length of the array is the number of days from the start of the infection to the end.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>The value is each call is the number of people at that stage of the infection.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>The people is cell 0 are the ones initially infected.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>Each simulated day the vales of the cell is moved to the right (next cell index).</span>
-          </p>
-        </li>
-        <ol>
-          <li>
-            <p role="presentation">
-              <span>The value in the last cell is dropped, i.e. the person no longer has the illness.</span>
-            </p>
-          </li>
-          <li>
-            <p role="presentation">
-              <span>Newly infected people are added to cell 0.</span>
-            </p>
-          </li>
-        </ol>
-        <li>
-          <p role="presentation">
-            <span>The number of deaths are so small that the simplifying assumption the dead are left in the array.</span>
-          </p>
-        </li>
-      </ol>
-
-      <h2>
-        <span>The stages of infection</span>
-      </h2>
-      <p>
-        <span>Note: a parameter is coloured in</span> <span>purple.</span> <span>These values can be adjusted to match known values (more of this will be explained later).</span>
-      </p>
-
-      <ol>
-        <li>
-          <p role="presentation">
-            <span>Newly infected people - in cell 0</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>People in cell</span> <em>becomeSpreader -</em> <span>can transmit infection to others. This value is a parameter we can set.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>The parameter</span> <span>daysAsSpreader</span> <span>for how many days the infected person can spread the infection to others. So all the people from cells</span> <em>becomeSpreader</em> <span>to (</span><em>becomeSpreader + daysAsSpreader - 1)</em> <span>can create new infections. This period is known as</span> <span>spread period</span><span>. A person must be a spreader at least until they are at the visible symptoms (</span><em>symptomsAppear</em><span>) day. Although this restriction is not enforced in the model.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>The number of people each person in the spread period cells is given by the parameter</span> <em>infectPerDay</em><span>. So the number of new infections per simulated day is given by the total number of people in the spread period cells (</span><em>infectiousPeople</em><span>) times</span> <em>infectPerDay</em><span>.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>The cell (day)</span> <em>symptomsAppear</em> <span>is when the infected person shows visible symptoms, i.e. the person feels sick and knows he or she is ill.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>The next cell is the number of days (</span><em>administrativeDelay</em><span>) from</span> <em>symptomsAppear</em> <span>to the infection being recorded by the authorities.</span>
-          </p>
-        </li>
-        <li>
-          <p role="presentation">
-            <span>Since we know not everybody that can be recorded is not so we have another parameter (</span>
-          </p>
-        </li>
-      </ol>
-
-<img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
-<!--<svg viewBox="0 0 240 80" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    .small { font: italic 13px sans-serif; }
-    .heavy { font: bold 30px sans-serif; }
-
-    /* Note that the color of the text is set with the    *
-     * fill property, the color property is for HTML only */
-    .Rrrrr { font: italic 40px serif; fill: red; }
-  </style>
-
-  <text x="20" y="35" class="small">My</text>
-  <text x="40" y="35" class="heavy">cat</text>
-  <text x="55" y="55" class="small">is</text>
-  <text x="65" y="55" class="Rrrrr">Grumpy!</text>
-</svg> -->
-   </div>
+    
+    <div class="row">
+      <img id="model" src="https://nurulc.github.io/coronavirus_stages.svg" alt="Stages of corona vires infection" >
+    </div>
   </div>
 </div>
 <div class="row">
-  <div class="my-tooltip  col-md-7">
+  <div class="my-tooltip  col-md-5">
     <span>Fit Error against official data: &nbsp;</span><span id="error_val" class="font-weight-bold red"></span>
     <span class="text-secondary"> &nbsp; adjust the sliders to make this value as small as possible.</span>
-    <button type="button" class="btn-xs btn-outline-info" data-toggle="modal" data-target="#exampleModal">
+    <button type="button" class="btn-xs btn-outline-info" data-toggle="modal" data-target="#errorExplain">
  Explain error
     </button>
 
 <!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="errorExplain" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -382,7 +138,12 @@ window.baseOptions = {
   <div class="col-md-2 text-right" id="scenario_div_title">
     Select Scenario
   </div>
-  <div class="col-md-3" id="scenario_div">
+  <div class="col-md-2" id="scenario_div">
+  </div>
+  <div class="col-md-2" id="optimize_div">
+    <button type="button" class="btn-xs btn-outline-info" id="optimize_button">
+        Optimize Parameters
+    </button>
   </div>
 </div>
 <div class="row">
