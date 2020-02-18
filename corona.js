@@ -12,7 +12,7 @@ let USE_ADJUSTED_OFFICIAL_DATA = false;
 let DEBUG = 0; 
 
 const chinaAdjustedData =[359, 461, 707, 831, 1198, 2599, 3512, 5687, 7717, 9916, 12513, 15223, 18539, 22152, 26628, 31395, 36140, 40175, 44540,
-47846, 51796, 54921, 57552, 59283, 64437,67100
+47846, 51796, 54921, 57552, 59283, 64437,67100, 69197, 71329
 ].map((v,i) => ({date: addDays(new Date("2020-01-20"),i).getTime(), official: v}));
 
 
@@ -42,15 +42,14 @@ let officialData_base = [
     {date: new Date("2020-02-11"), official: 45171}, //60,310
     {date: new Date("2020-02-12"), official: 59283}, //64467
     {date: new Date("2020-02-13"), official: 64437}, 
-    {date: new Date("2020-02-13"), official: 67100}, 
+    {date: new Date("2020-02-14"), official: 67100},
+    {date: new Date("2020-02-15"), official: 69197},
+    {date: new Date("2020-02-16"), official: 71329}
 ].map(({date, official}) => ({date: date.getTime(), official}));
 
 const officialData = () => USE_ADJUSTED_OFFICIAL_DATA?chinaAdjustedData:officialData_base;
   
   function OPTS(opts) { return Object.assign(Object.assign({}, DEFAULTS), opts)} 
- 
-
-
 
 let scenarios = [
    { desc: "Best data fit",
@@ -73,11 +72,11 @@ let scenarios = [
 			susceptible: 10000000,
 			maxNewInfection: 400000,
 			daysOfSimulation: 90,
-			reportingChange: 1.15,
+		/* 	reportingChange: 1.15,
 			showReal: 0,
 			official: 1,
 			simulated: 1,
-			isLog: 1
+			isLog: 1 */
 		}
    }, 
    {
@@ -102,29 +101,24 @@ let scenarios = [
 	{
 	  desc: "Adj Lower infection rate",
 	  more: "Adjust all the previous data up to reflect ",
-	  opts:  {
-		 	chinaAdjustedData: 1,
-		 	initial: 200,
-		 	daysOfSickness: 20,
-		 	becomeSpreader: 3.19,
-		 	daysAsSpreader: 2.0176,
-		 	symptomsAppear: 7.476,
-		 	infectPerDay: 1.5598,
-		 	percentRecorded: 0.131,
-		 	lockdown: 30.12,
-		 	spreadReduction: 0.8035,
-		 	administrativeDelay: 4.29,
-		 	dateAdjust: 30,
-		 	susceptible: 2779241,
-		 	maxNewInfection: 330000,
-		 	daysOfSimulation: 90,
+	  opts: {
+        chinaAdjustedData: 1,
+        initial: 200,
+        becomeSpreader: 3.19,
+        daysAsSpreader: 2.0176,
+        symptomsAppear: 7.476,
+        infectPerDay: 1.5598,
+        percentRecorded: 0.131,
+        lockdown: 30.12,
+        spreadReduction: 0.8035,
+        administrativeDelay: 4.29,
+        dateAdjust: 30,
+        susceptible: 2779241,
+        maxNewInfection: 330000,
+        daysOfSimulation: 90,
 		}
 	}
   ];
-
-
-
-
 
   function createScnearios() {
 	var array = scenarios.map( s=> s.desc);
@@ -213,7 +207,7 @@ setTimeout(() => {
 		buildInterface();
 		createScnearios();
 		let optimizer = ID("optimize_button");
-		optimizer.onclick = () => optimize(0.001);
+		optimizer.onclick = () => optimize(0.0001);
 	  simulate();
 	}, 100);
 
@@ -238,7 +232,7 @@ function _simulate(opts) {
 
 function simulate(opts) {
 	let [res, err] = _simulate(opts);   
-	let span = document.getElementById("error_val");
+	let span = ID("error_val");
 	if(span) span.innerHTML = round(err);
 	  lineChart(res, true, baseOptions.tick, 1200, 600, baseOptions);
 }
@@ -542,10 +536,15 @@ function less(a,b) {
   
 function square(a) { return a*a; }
 
-function rms(a,b) {
+function rms(a,b, weighted) {
 	let len = Math.min(a.length, b.length);
 	let sum = 0;
-	for(let i=0; i<len; i++ ) sum += square(a[i]-b[i]);
+	if(weighted) {
+		let scale = len*(len-1);
+		for(let i=0; i<len; i++ ) sum += i*(square(a[i]-b[i]));
+		sum /= scale;
+	}
+	else for(let i=0; i<len; i++ ) sum += square(a[i]-b[i]);
 	return sum;
 }
 
@@ -567,10 +566,13 @@ function error(_officialData, simulatedData) {
 	let _off = _officialData.map( v => adjFn(v.official));
     let _sim = simulatedData.slice(i, i+_officialData.length).map(v => adjFn(v.value));
     let mx = Math.log(arrMax(simulatedData, x => x.realValue));
+    const  WEIGHT_DATA=0.795, WEIGHT_SLOPE=0.2, WEIGHT_MAX = 0.005;
     //mx=0;
-    return (10*rms(_off, _sim)+0.25+mx+ 5*rms(derivitive(_off), derivitive(_sim)))/15.0;
-
-    //return (4*rms(_off, _sim)+0.25+mx+ 10*rms(derivitive(_off), derivitive(_sim)))/15.0;
+    return (
+      WEIGHT_DATA*rms(_off, _sim)+
+      WEIGHT_MAX*mx+ 
+      WEIGHT_SLOPE*rms(derivitive(_off), derivitive(_sim), true)
+    );
 	//return _officialData.reduce( (sum, v, j) => sum+square(Math.log(v.official)-Math.log(simulatedData[i+j].value)), 0);
 }
 
@@ -598,10 +600,11 @@ function computeGradients(propArray,err,props) {
 		    let dy = scale*(computeError(props,name,delta)-err)/delta;
 		    if( dy === 0) {
 		    	dy = -(computeError(props,name,-2*delta)-err); ///(2*delta);
-		    	console.log(name+" low "+dy);
+		    	//console.log(name+" low "+dy);
 		    }
 			gradients[name] = dy;
-			sum += Math.abs(dy);
+			//sum += Math.abs(dy);
+			sum += dy;
 			return gradients;
 	}, {});
 
@@ -611,6 +614,8 @@ function computeGradients(propArray,err,props) {
 	}
 	return gradients;
 }
+
+
 
 const propsToProcess =[
 	["infectPerDay", 0.01 ,1],
@@ -631,93 +636,266 @@ const propsToProcess =[
 	}
 );
 
-function incrPropsOld(props, propsToProcess, gradients, learningRate, backup) {
-	let [mname, mvalue] = Object.keys(gradients).map( name => [name, gradients[name] ]).sort( (a,b) => Math.abs(b[1]) - Math.abs(a[1]))[0];
-    console.log("mname: ", mname, mvalue);
-	propsToProcess.forEach( ([name,step, min, max, scale]) => {
-		    if( mname !== name) return;
-			let newVal = props[name]-(gradients[name]*learningRate)/scale;
-			if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
-			else console.log("*** adj ", props[name], newVal,gradients[name],learningRate,scale);
-			if(newVal >= min && newVal <= max)
-				backup[name] = newVal;
-			else console.log("invalid val", name, gradients[name], newVal);
-		} );
-	return backup;
+function getGradientDescent(computeGradientsAdam, incrPropsAdam) {
+	return function (propsToProcess, steps, learningRate, display = (opts => 0), decayOfLearningRate = 0.9995) {
+			let props = Object.assign({}, baseOptions);
+			let original = Object.assign({}, baseOptions);
+			let lastError = computeError(props);
+			let bestErr = lastError;
+			let bestOpts = Object.assign({}, props);
+			let gradients = computeGradientsAdam(propsToProcess, lastError,props);
+			let backup = Object.assign({}, baseOptions);
+			//console.log("GRADIENTS",gradients);
+
+			function aStep(i) {
+				let newProps = incrPropsAdam(props, propsToProcess, gradients, learningRate, backup)
+				let err = computeError(newProps);
+				if(err > lastError && Math.abs((err-lastError)/lastError) > 0.1) {
+					learningRate /= 2.0;
+					return true;
+				}
+				backup = props;
+				props = newProps;
+				if(err < bestErr) {
+					bestErr = err;
+					bestOpts = Object.assign(bestOpts, props);
+				}
+				if(Math.abs(err-lastError) < 0.000001 && i > 0.25*steps) return false;
+				//if(i && (i%100) === 0 ) display(props);
+				lastError = err;
+				
+				gradients = computeGradientsAdam(propsToProcess,err,props);
+				return true;
+			}
+			let i=0;
+			function optGroup() {
+				Object.assign(baseOptions,props);
+				setOptionValues();
+				simulate();
+				for(let j=0; j<100; j++, i++){
+						  if( !aStep(i) ) { i = steps; break; }
+						  learningRate *= decayOfLearningRate;
+				}
+				if(i < steps) setTimeout(optGroup,0);
+				else {
+					Object.assign(baseOptions,bestOpts);
+					setOptionValues();
+					simulate();
+					let button =ID("optimize_button");
+					button.innerHTML = "Optimize Parameters";
+					button.disabled = false;
+					document.body.style.cursor = 'default';
+		      console.log("OPTIMIZED:")
+					console.log(JSON.stringify(bestOpts));
+				} 
+			}
+			optGroup();
+		};
 }
+
+// function incrPropsOld(props, propsToProcess, gradients, learningRate, backup) {
+// 	let [mname, mvalue] = Object.keys(gradients).map( name => [name, gradients[name] ]).sort( (a,b) => Math.abs(b[1]) - Math.abs(a[1]))[0];
+//     console.log("mname: ", mname, mvalue);
+// 	propsToProcess.forEach( ([name,step, min, max, scale]) => {
+// 		    if( mname !== name) return;
+// 			let newVal = props[name]-(gradients[name]*learningRate)/scale;
+// 			//if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
+// 			//else console.log("*** adj ", props[name], newVal,gradients[name],learningRate,scale);
+// 			if(newVal >= min && newVal <= max)
+// 				backup[name] = newVal;
+// 			//else console.log("invalid val", name, gradients[name], newVal);
+// 		} );
+// 	return backup;
+// }
+
 
 
 function incrProps(props, propsToProcess, gradients, learningRate, backup) {
 	propsToProcess.forEach( ([name,step, min, max, scale]) => {
 			let newVal = props[name]-(gradients[name]*learningRate)/scale;
-			if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
+			//if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
 			if(newVal >= min && newVal <= max)
 				backup[name] = newVal;
-			else console.log("invalid val", name, gradients[name], newVal);
+			//else console.log("invalid val", name, gradients[name], newVal);
 		} );
 	return backup;
 }
-function gradientDescent(propsToProcess, steps, learningRate, display = (opts) => 0) {
-	let props = Object.assign({}, baseOptions);
-	let original = Object.assign({}, baseOptions);
-	let lastError = computeError(props);
-	let bestErr = lastError;
-	let bestOpts = Object.assign({}, props);
-	let gradients = computeGradients(propsToProcess, lastError,props);
-	let decayOfLearningRate = 0.9999;
-	let backup = Object.assign({}, baseOptions);
-	console.log("GRADIENTS",gradients);
 
-	function aStep(i) {
-		let newProps = incrProps(props, propsToProcess, gradients, learningRate, backup)
-		let err = computeError(newProps);
-		if(err > lastError && Math.abs((err-lastError)/lastError) > 0.1) {
-			learningRate /= 2.0;
-			return true;
-		}
-		backup = props;
-		props = newProps;
-		if(err < bestErr) {
-			bestErr = err;
-			bestOpts = Object.assign(bestOpts, props);
-		}
-		if(Math.abs(err-lastError) < 0.0001 && i > 0.25*steps) return false;
-		//if(i && (i%100) === 0 ) display(props);
-		lastError = err;
+// function incrPropsAdam(props, propsToProcess, gradients, learningRate, backup) {
+// 	propsToProcess.forEach( ([name,step, min, max, scale]) => {
+// 			let newVal = props[name]-(gradients[name]*learningRate)/scale;
+// 			//if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
+// 			if(newVal >= min && newVal <= max)
+// 				backup[name] = newVal;
+// 			//else console.log("invalid val", name, gradients[name], newVal);
+// 		} );
+// 	return backup;
+// } 
+
+// function gradientDescent(propsToProcess, steps, learningRate, display = (opts => 0), decayOfLearningRate = 0.9995) {
+// 	let props = Object.assign({}, baseOptions);
+// 	let original = Object.assign({}, baseOptions);
+// 	let lastError = computeError(props);
+// 	let bestErr = lastError;
+// 	let bestOpts = Object.assign({}, props);
+// 	let gradients = computeGradients(propsToProcess, lastError,props);
+// 	let backup = Object.assign({}, baseOptions);
+// 	//console.log("GRADIENTS",gradients);
+
+// 	function aStep(i) {
+// 		let newProps = incrProps(props, propsToProcess, gradients, learningRate, backup)
+// 		let err = computeError(newProps);
+// 		if(err > lastError && Math.abs((err-lastError)/lastError) > 0.1) {
+// 			learningRate /= 2.0;
+// 			return true;
+// 		}
+// 		backup = props;
+// 		props = newProps;
+// 		if(err < bestErr) {
+// 			bestErr = err;
+// 			bestOpts = Object.assign(bestOpts, props);
+// 		}
+// 		if(Math.abs(err-lastError) < 0.000001 && i > 0.25*steps) return false;
+// 		//if(i && (i%100) === 0 ) display(props);
+// 		lastError = err;
 		
-		gradients = computeGradients(propsToProcess,err,props);
-		return true;
+// 		gradients = computeGradients(propsToProcess,err,props);
+// 		return true;
+// 	}
+// 	let i=0;
+// 	function optGroup() {
+// 		Object.assign(baseOptions,props);
+// 		setOptionValues();
+// 		simulate();
+// 		for(let j=0; j<100; j++, i++){
+// 				  if( !aStep(i) ) { i = steps; break; }
+// 				  learningRate *= decayOfLearningRate;
+// 		}
+// 		if(i < steps) setTimeout(optGroup,0);
+// 		else {
+// 			Object.assign(baseOptions,bestOpts);
+// 			setOptionValues();
+// 			simulate();
+// 			let button =ID("optimize_button");
+// 			button.innerHTML = "Optimize Parameters";
+// 			button.disabled = false;
+// 			document.body.style.cursor = 'default';
+//       console.log("OPTIMIZED:")
+// 			console.log(JSON.stringify(bestOpts));
+// 		} 
+// 	}
+// 	optGroup();
+// }
+/*-------------------- ADAM ----------------------------- */
+
+class Adam {
+    constructor(nparams, beta_1=0.9, beta_2=0.999, epsilon=1e-8) {
+        this.nparams= nparams;
+        this.beta_1= beta_1;
+        this.beta_2= beta_2;
+        this.epsilon= epsilon;
+
+        this.m= []; 
+        this.v= [];
+        for(var i= 0 ; i < this.nparams ; ++i) {
+            this.m[i]= 0; // Initialize 1st moment vector
+            this.v[i]= 0; // Initialize 2nd moment vector
+        }
+        this.t = 0; //Initialize timestep
+        this.b1t = beta_1;
+        this.b2t = beta_2;
+        this.updates = new Array(this.nparams);
+    }
+    
+    // g is a function that returns the gradient of the i(th) parameter
+    get_update(alpha, g) { // alpha is the learning rate, g is the gradient vector (array oflength 'nparams')
+        this.t += 1;
+        let updates= this.updateds
+        const {m,v,b,beta_1,beta_2, b1t, b2t, epsilon, nparams} = this;
+         
+        for(var i= 0 ; i < nparams ; ++i) {
+        	let grad = g[i];
+            m[i]= beta_1*m[i] + (1-beta_1)*grad; // Update biased first moment estimate
+            v[i]= beta_2*v[i] + (1-beta_2)*grad*grad; // Update biased second raw moment estimate
+            var mub= m[i]/(1 - b1t); // Compute bias-corrected first moment estimate
+            var vub= v[i]/(1 - b2t); // Compute bias-corrected second raw moment estimate
+            updates[i]= - alpha * mub / ( Math.sqrt(vub) + epsilon  ); // Return parameter updates
+        }
+        this.b1t *= beta_1*beta_1;
+        this.b2t *= beta_2*beta_2;
+        return updates;
+    };
+}
+
+function objToArray(list, obj) {
+	return list.map( k => obj[key]) 
+}
+
+function updateObj(list, delta, obj) {
+	return list.forEach( (k,i) => obj[key] +=  delta[i]) 
+
+}
+
+const adam = new Adam(propsToProcess.length);
+
+function computeGradientsAdam(propArray,err,props) {
+	err = err || computeError(props); // base error;
+	let sum = 0;
+	let gradients = propArray.map((gradients, [name, delta, scale]) =>{
+		    let dy = scale*(computeError(props,name,delta)-err)/delta;
+		    if( dy === 0) {
+		    	dy = -(computeError(props,name,-2*delta)-err); ///(2*delta);
+		    	//console.log(name+" low "+dy);
+		    }
+			//sum += Math.abs(dy);
+			sum += dy;
+			return dy;
+	});
+
+	if(sum > err*4) {
+		let prod = err/sum;
+		for(let i=0; i< gradients.length; i++)
+		   gradients[i] *= prod*0.25;
 	}
-	let i=0;
-	function optGroup() {
-		Object.assign(baseOptions,props);
-		setOptionValues();
-		simulate();
-		for(let j=0; j<100; j++, i++){
-				  if( !aStep(i) ) { i = steps; break; }
-				  learningRate *= decayOfLearningRate;
-		}
-		if(i < steps) setTimeout(optGroup,0);
-		else {
-			Object.assign(baseOptions,bestOpts);
-			setOptionValues();
-			simulate();
-			console.log(bestOpts);
-		} 
-	}
-	optGroup();
+	return gradients;
 }
 
 
-function optimize(learningRate=0.0005) {
-	return gradientDescent(propsToProcess, 4000, learningRate, (props) => { 
+function incrPropsAdam(props, propsToProcess, gradients, learningRate, backup) {
+	let updates = adam.get_update(gradients, learningRate);
+	propsToProcess.forEach( ([name,step, min, max, scale],ix) => {
+			let newVal = props[name]-updates[ix];
+			//if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
+			if(newVal >= min && newVal <= max)
+				backup[name] = newVal;
+			//else console.log("invalid val", name, gradients[name], newVal);
+		} );
+	return backup;
+} 
+
+
+
+
+/* --- END ADAM --------------------------------------- */
+
+
+function optimize(learningRate=0.05, learningDecay=0.999) {;
+	let gradDesc = getGradientDescent(computeGradients, incrProps);
+	
+	let button = ID("optimize_button");
+			button.innerHTML = "working...";
+			button.disabled = true;
+			document.body.style.cursor = 'wait';
+	return gradDesc(propsToProcess, 4000, learningRate, (props) => { 
 		let backup = baseOptions;
 		baseOptions = Object.assign({},props);
 		setOptionValues();
 		simulate();
 		baseOptions = backup;
-	});
+	},learningDecay);
 }
+
+
 /* END ---------------- Gradient descent optimization of various baseOptions  */
 
 function adjustData(baseOptions) {
@@ -781,7 +959,7 @@ function lineChart(data, _, tickCount = 4, _width = 1000, _height = 700,opts ={}
 		height = _height - margin.top - margin.bottom;
 
 	  // append the svg object to the body of the page
-	  let div = document.getElementById("model_target");
+	  let div = ID("model_target");
 	  div.innerHTML = null;
 	  var svg = d3.select("#model_target")
 		.append("svg")
@@ -850,8 +1028,10 @@ function lineChart(data, _, tickCount = 4, _width = 1000, _height = 700,opts ={}
 
 			  // Add Y axis
 			let minVal = isLog ? 1 : 0;
+      let max1 = d3.max(_officialData, d => d.official), 
+          max2 = d3.max(data, d => showReal ? d.realValue: d.value);
 			var y = (isLog ? d3.scaleLog() : d3.scaleLinear())
-				.domain([minVal, d3.max(data, d => showReal ? d.realValue: d.value)])
+				.domain([minVal, Math.max(max1,max2)])
 				.range([height, 0]);
 		 
 		const LL =(text, color, x, y) => lineLabel(svg,text, color, x, y);
@@ -1010,7 +1190,7 @@ function dateFormatter(time) {
 
 		let rct = focus.append("rect")
 			.attr("class", "tooltip-d3")
-			.attr("width", 210)
+			.attr("width", 230)
 			.attr("height", 120)
 			.attr("x", 10)
 			.attr("y", -22)
@@ -1021,7 +1201,7 @@ function dateFormatter(time) {
 			.attr("class", "tooltip-date")
 			.attr("x", 18)
 			.attr("y", -2); */
-		"date,Date\tofficial,Official\tvalue,Reported\tnewCases,New Cases\trealValue,All Infection\tperDay,New Infections".split("\t")
+		"date,Date\tofficial,Official\tvalue,Reported\tnewCases,New Cases\trealValue,All Infection\tperDay,New Infections R0".split("\t")
 		  .map(s => s.split(',')).map(([key,label],i) => {
 			  focus.append("text")
 				  .attr("class", 'tooltip-label')
@@ -1031,7 +1211,7 @@ function dateFormatter(time) {
 
 			  focus.append("text")
 				  .attr("class", "tooltip-d3-"+key)
-				  .attr("x", 120)
+				  .attr("x", 140)
 				  .attr("y", 18*(i)-2);
 				
 				});
@@ -1093,7 +1273,7 @@ function getInterfaceInfo() {
    
 	return [
 	  {name: "infectPerDay", val: 2.3, min: 0, max:10.0, step: 0.001, title: "Infect/Day ",
-		description: " How may people a spreader infects every day, this is just the base for computing the actual new infections per spreader. This value depends on the lockdown factor and the total population seceptable to infection. Hover ove the graph to see the actual new infections created by each spreader"},
+		description: " How may people a spreader infects every day, (note this is not R<sub>0</sub>) this is just the base for computing the actual new infections per spreader. This value depends on the lockdown factor and the total population seceptable to infection. Hover ove the graph to see the actual new infections created by each spreader"},
 	  {name: "becomeSpreader", val: 4, min: 0, max:15, title: "Spreader Day ", step: 0.1,
 		description: "Days after infection the person become a spreader"},
 	  {name: "daysAsSpreader", val: 6,min: 2, max:15, title: "Days as Spreader ", step: 0.1,
@@ -1132,14 +1312,14 @@ function getInterfaceValue(name) {
 function buildInterface() {
 	let interface = getInterfaceInfo();
 	let str = getInterface(interface);
-	var div = document.getElementById("interface");
+	var div = ID("interface");
 	
 		 
 	div.innerHTML = str;
 		interface.forEach(({name,step,percent}) => {
 		step = step || 1;
-		var slider =  document.getElementById(name+ '_slider');
-		var output = document.getElementById(name+ '_val');
+		var slider =  ID(name+ '_slider');
+		var output = ID(name+ '_val');
 		output.innerHTML = (slider.value)*step;
 
 		slider.oninput = function() {
@@ -1150,7 +1330,15 @@ function buildInterface() {
 	setOptionValues();
 }
 
-function getInterface(interface) {
+/*________________________________________ */
+
+function makeElem(name, sep, dflt) {
+	    if(name === undefined) return element;
+		if(!dflt) return (props,c) => element(name, props,c,sep||'');
+		else throw Error("Make elem - defaulst not yet implemented");
+
+
+
    function element(name, props, content,sep='') {
 		if(content === undefined && typeof props !== 'object' ) {
 			content = props;
@@ -1193,18 +1381,24 @@ function getInterface(interface) {
 		
 		return ""+v;
 	}
-	function makeElem(name, sep, dflt) {
-		if(!dflt) return (props,c) => element(name, props,c,sep||'');
-		else throw Error("Make elem - defaulst not yet implemented")
-	}
-	const div = makeElem('div','\n'),
-		span = makeElem('span'),
-		input = makeElem('input'),
-		h1 = makeElem('h1'),
-		h2  = makeElem('h2'),
-		p  = makeElem('p');
+	
+}
+
+const div = makeElem('div','\n'),
+	span = makeElem('span'),
+	input = makeElem('input'),
+	h1 = makeElem('h1'),
+	h2  = makeElem('h2'),
+	p  = makeElem('p');
 	
 	
+
+
+
+/* ----------------------------------------------*/
+
+function getInterface(interface) {
+
 	function toRows(arr, n) {
 		if(!n) return [arr];
 		let res = [];
@@ -1243,9 +1437,9 @@ function getInterface(interface) {
 	return toRows(interface,3).map( row => 
 				div({klass: 'row'},  () => row.map(genSlider).join("\n"))
 		).join('\n')
-   }
+}
    
-   function downloadJSON(data,name, mime_type) {
+function downloadJSON(data,name, mime_type) {
 
 	mime_type = mime_type || 'application/json';
 
@@ -1334,3 +1528,33 @@ function decRange(range) {
     return range;
 }
 //optimize_button
+
+function arrowLine(svg, x1,y1, x2,y2) {
+	svg.append("g")
+      .selectAll("line")
+      .enter()
+      .append("line")
+      .attr("x1", x1)
+      .attr("y1", y1)
+      .attr("x2", x2)
+      .attr("y2", y2)
+      .attr("marker-end", "url(#triangle)") // add the marker
+      .style("stroke", "brown")           // colour the line
+      .style("stroke-width", 4)          // adjust line width
+      .style("stroke-linecap", "square") // stroke-linecap type
+               ;
+
+	svg.append("svg:defs")
+      .append("svg:marker") 
+      .attr("id", "triangle")
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 6)
+      .attr('markerWidth', 10)
+      .attr('markerHeight', 10)
+      .attr('orient', 'auto')
+      .append('svg:path')
+        .attr('d', 'M0,-5L10,0L0,5')
+                 ;
+}
+
+
