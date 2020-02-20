@@ -3,7 +3,8 @@
 let POP = 10000000; // area population suseptable
 let MAX_NEW_INFECTION = 100000; // fudge factor to limit new infections based to the population = 120;
 let SIMULATION_DAYS = 140;
-const DEFAULTS = Object.assign({chinaAdjustedData: 0}, baseOptions);
+const DEFAULTS = Object.assign({chinaAdjustedData: 0, reportingChange: 1.15}, baseOptions);
+baseOptions = Object.assign({}, DEFAULTS);
 const BASE_DATE = "2020-01-25";
 const NEW_REPORTING_DATE = "2020-02-12";
 const MS_PER_DAY = 60*60*24*1000;
@@ -12,7 +13,7 @@ let USE_ADJUSTED_OFFICIAL_DATA = false;
 let DEBUG = 0; 
 
 const chinaAdjustedData =[359, 461, 707, 831, 1198, 2599, 3512, 5687, 7717, 9916, 12513, 15223, 18539, 22152, 26628, 31395, 36140, 40175, 44540,
-47846, 51796, 54921, 57552, 59283, 64437,67100, 69197, 71329
+47846, 52696, 54921, 57552, 59283, 64437,67100, 69169, 71329,73332, 75198, 75700
 ].map((v,i) => ({date: addDays(new Date("2020-01-20"),i).getTime(), official: v}));
 
 
@@ -43,8 +44,11 @@ let officialData_base = [
     {date: new Date("2020-02-12"), official: 59283}, //64467
     {date: new Date("2020-02-13"), official: 64437}, 
     {date: new Date("2020-02-14"), official: 67100},
-    {date: new Date("2020-02-15"), official: 69197},
-    {date: new Date("2020-02-16"), official: 71329}
+    {date: new Date("2020-02-15"), official: 69169},
+    {date: new Date("2020-02-16"), official: 71329},
+    {date: new Date("2020-02-17"), official: 73332},
+    {date: new Date("2020-02-18"), official: 75198},
+    {date: new Date("2020-02-19"), official: 75700}
 ].map(({date, official}) => ({date: date.getTime(), official}));
 
 const officialData = () => USE_ADJUSTED_OFFICIAL_DATA?chinaAdjustedData:officialData_base;
@@ -72,6 +76,7 @@ let scenarios = [
 			susceptible: 10000000,
 			maxNewInfection: 400000,
 			daysOfSimulation: 90,
+			reportingChange: 1,
 		/* 	reportingChange: 1.15,
 			showReal: 0,
 			official: 1,
@@ -95,7 +100,8 @@ let scenarios = [
 			  maxNewInfection: 330000,
 			  daysOfSimulation:90,
 			  showReal:1, isLog:1,
-			  chinaAdjustedData: 0
+			  chinaAdjustedData: 0,
+        reportingChange: 1.15
 		  }
 	},
 	{
@@ -103,6 +109,7 @@ let scenarios = [
 	  more: "Adjust all the previous data up to reflect ",
 	  opts: {
         chinaAdjustedData: 1,
+        reportingChange: 1.2,
         initial: 200,
         becomeSpreader: 3.19,
         daysAsSpreader: 2.0176,
@@ -162,8 +169,8 @@ function reportingPercent(props,  day) {
 		_reportingIndex = props.dateAdjust + diff;
 		_cachedOffset = props.dateAdjust;
     }
-    if(USE_ADJUSTED_OFFICIAL_DATA || day < _reportingIndex) return [props.percentRecorded, 0];
-    return [props.reportingChange * props.percentRecorded, 15000-6700];
+    if( day < _reportingIndex) return [props.percentRecorded, 0];
+    return [props.reportingChange * props.percentRecorded, (USE_ADJUSTED_OFFICIAL_DATA?0:15000-6700)];
     //return props.reportingChange * props.percentRecorded;
 }
   
@@ -226,14 +233,15 @@ function _simulate(opts) {
 	let _officialData = officialData()
 	//console.log({POP});
 	let res = computeData(SIMULATION_DAYS, o);
-	let err = Math.sqrt(error(_officialData, res))/_officialData.length*100;
+	//let err = Math.sqrt(error(_officialData, res))/_officialData.length*100;
+	let err = error(_officialData, res);
 	return [res, err];
 } 
 
 function simulate(opts) {
 	let [res, err] = _simulate(opts);   
 	let span = ID("error_val");
-	if(span) span.innerHTML = round(err);
+	if(span) span.innerHTML = err;//round(err,0.00001);
 	  lineChart(res, true, baseOptions.tick, 1200, 600, baseOptions);
 }
 
@@ -316,6 +324,16 @@ function arrSum(arr, start, len) {
 	 }
 	 for(let i= start; i<start+len; i++) sum += arr[i];
 	return sum;
+}
+
+function objSum(obj) {
+	return arrSum(Object.keys(obj).map(key => obj[key]));
+}
+
+function sumOf(objOrArray) {
+	if( Array.isArray(objOrArray) ) return arrSum(objOrArray);
+	if( typeof objOrArray === 'object') return objSum(objOrArray);
+	return 0;
 }
 
 
@@ -529,23 +547,23 @@ function init(initialInfection, daysOfSickness,n=0) {
 /* END NEW EFFICIENT Simulation ************************************** */
 
 /* ---------- OPTIMIZER --------- Gradient descent optimization of various baseOptions  */
-
+/* =====================================================================================*/
 function less(a,b) {
    return a.date < b.date;
 }
   
 function square(a) { return a*a; }
 
-function rms(a,b, weighted) {
+function rms(a,b, weight) {
 	let len = Math.min(a.length, b.length);
 	let sum = 0;
-	if(weighted) {
-		let scale = len*(len-1);
-		for(let i=0; i<len; i++ ) sum += i*(square(a[i]-b[i]));
+	if(weight) {
+		let scale = len*len*weight+1;
+		for(let i=0; i<len; i++ ) sum += (i*weight+1)*(square(a[i]-b[i]));
 		sum /= scale;
 	}
 	else for(let i=0; i<len; i++ ) sum += square(a[i]-b[i]);
-	return sum;
+	return len ?(sum/len): 0;
 }
 
 
@@ -566,13 +584,13 @@ function error(_officialData, simulatedData) {
 	let _off = _officialData.map( v => adjFn(v.official));
     let _sim = simulatedData.slice(i, i+_officialData.length).map(v => adjFn(v.value));
     let mx = Math.log(arrMax(simulatedData, x => x.realValue));
-    const  WEIGHT_DATA=0.795, WEIGHT_SLOPE=0.2, WEIGHT_MAX = 0.005;
+    const  WEIGHT_DATA=0.7, WEIGHT_SLOPE=0.3, WEIGHT_MAX = 0;
     //mx=0;
     return (
-      WEIGHT_DATA*rms(_off, _sim)+
+      WEIGHT_DATA*rms(_off, _sim, 1.0)+
       WEIGHT_MAX*mx+ 
-      WEIGHT_SLOPE*rms(derivitive(_off), derivitive(_sim), true)
-    );
+      WEIGHT_SLOPE*rms(derivitive(_off), derivitive(_sim), 6)
+    )*10000.0/(WEIGHT_DATA+WEIGHT_SLOPE+WEIGHT_MAX);
 	//return _officialData.reduce( (sum, v, j) => sum+square(Math.log(v.official)-Math.log(simulatedData[i+j].value)), 0);
 }
 
@@ -588,9 +606,175 @@ function computeError(opts, prop, delta) {
 	
 	//console.log({POP});
 	let res = computeData(SIMULATION_DAYS, o);
-	let err = Math.sqrt(error(_officialData, res)/_officialData.length)*100;
+	//let err = Math.sqrt(error(_officialData, res)/_officialData.length)*100;
+	let err = error(_officialData, res);
 	return err;
 }
+
+
+const propsToProcess =[
+	["infectPerDay", 0.00001 ,1],
+	["becomeSpreader", 0.00001, 1],
+	["daysAsSpreader", 0.0001, 1],
+	["symptomsAppear", 0.0001, 1],
+	["percentRecorded", 0.0000001, 0.001],
+//	["lockdown", 0.1, 0.25],
+	["administrativeDelay", 0.0001, 0.25],
+	["spreadReduction", 0.0000001, 0.25],
+	["initial", 0.00001, 0.01],
+	["susceptible", 2000, 10000],
+	["maxNewInfection", 20, 100]
+].map( ([pName, pStep, scale]) => {
+	let {min, max} = getInterfaceValue(pName);
+		return [pName, pStep, min, (pName==="spreadReduction")?max*0.92:max, scale];
+		
+	}
+);
+
+
+function testGradients(delta=1) { 
+    let props = Object.assign({}, baseOptions);
+			let lastError = computeError(props);
+			let gradients = computeGradientsAdam(propsToProcess, lastError,props, 1*delta);
+    let grads1 = computeGradientsAdam(propsToProcess, lastError,props, -1*delta);
+    return [gradients.map((v,i) => v - grads1[i]), gradients, grads1]
+}
+
+/*
+
+
+const propsToProcess =[
+	["infectPerDay", 0.01 ,0.25],
+	["becomeSpreader", 0.001, 0.25],
+	["daysAsSpreader", 0.001, 0.25],
+	["symptomsAppear", 0.001, 0.025],
+	["percentRecorded", 0.001, 0.001],
+//	["lockdown", 0.1, 0.25],
+	["administrativeDelay", 0.01, 0.25],
+	["spreadReduction", 0.01, 0.25],
+	["initial", 0.1, 0.1],
+	["susceptible", 2000000, 0.001],
+	["maxNewInfection", 20000, 0.001]
+].map( ([pName, pStep, scale]) => {
+	let {min, max} = getInterfaceValue(pName);
+		return [pName, pStep, min, (pName==="spreadReduction")?max*0.92:max, scale];
+		
+	}
+);
+*/
+
+function random(range,offset=0) {
+	return (Math.random()-offset)*range
+}
+
+function randomI(range,offset=0) {
+	return Math.trunc((Math.random()-offset)*range);
+}
+
+function randomPerterb(opts,propsToProcess, percent=0.1) {
+	let count = randomI(4)
+	for(let i=0; i< count; i++){
+		let ix = randomI(4);
+		opts[propsToProcess[ix][0]] *= (1.0+random(percent, 0.5));
+	}
+}
+
+
+function getGradientDescent(computeGradients, incrProps) {
+	return function (propsToProcess, steps, learningRate, display = (opts => 0), decayOfLearningRate = 0.9995) {
+			
+			let original = Object.assign({}, baseOptions);
+			let props = Object.assign({}, baseOptions);
+			let lastError = computeError(props);
+			let gradients = computeGradients(propsToProcess, lastError,props);
+			let backup = Object.assign({}, baseOptions);
+			let bestErr = lastError;propsToProcess
+			let bestOpts = Object.assign({}, props);
+			
+			randomPerterb(props, propsToProcess,  0.1)
+			// let err = lastError;
+			// let ds = 1;
+			// while(Math.abs(sumOf(gradients)*learningRate*100) > err	){ 
+			// 	learningRate /= 10;
+			// 	let newProps = incrProps(props, propsToProcess, gradients, learningRate, backup);
+			// 	err = computeError(newProps);
+			// 	backup = props;
+			// 	props = newProps;
+			// 	ds *= -1*0.1;
+			// 	gradients = computeGradients(propsToProcess, err,props,ds);
+			// }	
+			let cumChange = 0;
+			function aStep(i) {
+				let newProps = incrProps(props, propsToProcess, gradients, learningRate, backup);
+				let err = computeError(newProps);
+				// let z =0;
+			 //    while( z<10 && err > bestErr*1.05) {
+			 //    	while(Math.abs(sumOf(gradients)*learningRate*50) > lastError	) {
+			 //    		for(let k=0; k<gradients.length; k++) gradients[k] *= 0.8;
+			 //    	}
+			 //    	newProps = incrProps(props, propsToProcess, gradients, learningRate, backup);
+				// 	err = computeError(newProps);
+				// 	z++;
+			 //    }
+				//     let change = Math.abs((err-bestErr)/bestErr);
+				//     if(i > 0.1*steps && change > 0.05) {
+				//     	learningRate / = 2.0;
+				//     }
+				//     if(bestErr < err  && change > 0.05) {
+				// 	   learningRate / = 2.0;
+				// 	   lastErr = bestErr;
+				// 	   props = Object.assign(props, bestOpts);
+				// 	   gradients = computeGradients(propsToProcess,lastErr,props);
+				// 	   return true;
+				// 	}
+					
+				// }
+				//console.log("ERROR",err); 
+				backup = props;
+				props = newProps;
+				if(err < bestErr) {
+					bestErr = err;
+					bestOpts = Object.assign(bestOpts, props);
+				}
+				if(Math.abs(err-lastError) < 0.00000001 && i > 0.25*steps) return false;
+				//if(i && (i%100) === 0 ) display(props);
+				lastError = err;
+				gradients = computeGradients(propsToProcess,err,props);
+				return true;
+			}
+			let i=0;
+			function optGroup() {
+				Object.assign(baseOptions,props);
+				setOptionValues();
+				simulate();
+
+				let meanErr =0, baseErr = lastError;
+//				console.log("MEAN ERROR: " + (meanErr/100) + " " + lastError + " ------------------------------");
+				for(let j=0; j<100; j++, i++){
+						  if( !aStep(i) ) { i = steps; break; }
+						  learningRate *= decayOfLearningRate;
+						  meanErr += lastError;
+				}
+				if(meanErr/baseErr > 100 ) learningRate /= 2.0;
+//				console.log("MEAN ERROR: " + (meanErr/100) + " " + lastError + " *******************************");
+				if(i < steps) setTimeout(optGroup,0);
+				else {
+					Object.assign(baseOptions,bestOpts);
+					setOptionValues();
+					simulate();
+					let button =ID("optimize_button");
+					button.innerHTML = "Optimize Parameters";
+					button.disabled = false;
+					document.body.style.cursor = 'default';
+		      console.log("OPTIMIZED:")
+					console.log(JSON.stringify(bestOpts));
+				} 
+			}
+			optGroup();
+		};
+}
+
+/*    ------- SIMPLE GRADIENT SESCENT ----------------------------- */
 
 // each elenemt of the propArray [[nme, delta]...]
 function computeGradients(propArray,err,props) {
@@ -616,100 +800,6 @@ function computeGradients(propArray,err,props) {
 }
 
 
-
-const propsToProcess =[
-	["infectPerDay", 0.01 ,1],
-	["becomeSpreader", 0.01, 1],
-	["daysAsSpreader", 0.01, 1],
-	["symptomsAppear", 0.01, 1],
-	["percentRecorded", 0.0001, 0.000001],
-	["lockdown", 0.1, 1],
-	["administrativeDelay", 0.1, 1],
-	["spreadReduction", 0.01, 1],
-	["initial", 1, 1],
-	["susceptible", 2000000, 0.00001],
-	["maxNewInfection", 20000, 0.00001]
-].map( ([pName, pStep, scale]) => {
-	let {min, max} = getInterfaceValue(pName);
-		return [pName, pStep, min, (pName==="spreadReduction")?max*0.92:max, scale];
-		
-	}
-);
-
-function getGradientDescent(computeGradientsAdam, incrPropsAdam) {
-	return function (propsToProcess, steps, learningRate, display = (opts => 0), decayOfLearningRate = 0.9995) {
-			let props = Object.assign({}, baseOptions);
-			let original = Object.assign({}, baseOptions);
-			let lastError = computeError(props);
-			let bestErr = lastError;
-			let bestOpts = Object.assign({}, props);
-			let gradients = computeGradientsAdam(propsToProcess, lastError,props);
-			let backup = Object.assign({}, baseOptions);
-			//console.log("GRADIENTS",gradients);
-
-			function aStep(i) {
-				let newProps = incrPropsAdam(props, propsToProcess, gradients, learningRate, backup)
-				let err = computeError(newProps);
-				if(err > lastError && Math.abs((err-lastError)/lastError) > 0.1) {
-					learningRate /= 2.0;
-					return true;
-				}
-				backup = props;
-				props = newProps;
-				if(err < bestErr) {
-					bestErr = err;
-					bestOpts = Object.assign(bestOpts, props);
-				}
-				if(Math.abs(err-lastError) < 0.000001 && i > 0.25*steps) return false;
-				//if(i && (i%100) === 0 ) display(props);
-				lastError = err;
-				
-				gradients = computeGradientsAdam(propsToProcess,err,props);
-				return true;
-			}
-			let i=0;
-			function optGroup() {
-				Object.assign(baseOptions,props);
-				setOptionValues();
-				simulate();
-				for(let j=0; j<100; j++, i++){
-						  if( !aStep(i) ) { i = steps; break; }
-						  learningRate *= decayOfLearningRate;
-				}
-				if(i < steps) setTimeout(optGroup,0);
-				else {
-					Object.assign(baseOptions,bestOpts);
-					setOptionValues();
-					simulate();
-					let button =ID("optimize_button");
-					button.innerHTML = "Optimize Parameters";
-					button.disabled = false;
-					document.body.style.cursor = 'default';
-		      console.log("OPTIMIZED:")
-					console.log(JSON.stringify(bestOpts));
-				} 
-			}
-			optGroup();
-		};
-}
-
-// function incrPropsOld(props, propsToProcess, gradients, learningRate, backup) {
-// 	let [mname, mvalue] = Object.keys(gradients).map( name => [name, gradients[name] ]).sort( (a,b) => Math.abs(b[1]) - Math.abs(a[1]))[0];
-//     console.log("mname: ", mname, mvalue);
-// 	propsToProcess.forEach( ([name,step, min, max, scale]) => {
-// 		    if( mname !== name) return;
-// 			let newVal = props[name]-(gradients[name]*learningRate)/scale;
-// 			//if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
-// 			//else console.log("*** adj ", props[name], newVal,gradients[name],learningRate,scale);
-// 			if(newVal >= min && newVal <= max)
-// 				backup[name] = newVal;
-// 			//else console.log("invalid val", name, gradients[name], newVal);
-// 		} );
-// 	return backup;
-// }
-
-
-
 function incrProps(props, propsToProcess, gradients, learningRate, backup) {
 	propsToProcess.forEach( ([name,step, min, max, scale]) => {
 			let newVal = props[name]-(gradients[name]*learningRate)/scale;
@@ -720,73 +810,10 @@ function incrProps(props, propsToProcess, gradients, learningRate, backup) {
 		} );
 	return backup;
 }
+/*    END ------- SIMPLE GRADIENT SESCENT ----------------------------- */
 
-// function incrPropsAdam(props, propsToProcess, gradients, learningRate, backup) {
-// 	propsToProcess.forEach( ([name,step, min, max, scale]) => {
-// 			let newVal = props[name]-(gradients[name]*learningRate)/scale;
-// 			//if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
-// 			if(newVal >= min && newVal <= max)
-// 				backup[name] = newVal;
-// 			//else console.log("invalid val", name, gradients[name], newVal);
-// 		} );
-// 	return backup;
-// } 
 
-// function gradientDescent(propsToProcess, steps, learningRate, display = (opts => 0), decayOfLearningRate = 0.9995) {
-// 	let props = Object.assign({}, baseOptions);
-// 	let original = Object.assign({}, baseOptions);
-// 	let lastError = computeError(props);
-// 	let bestErr = lastError;
-// 	let bestOpts = Object.assign({}, props);
-// 	let gradients = computeGradients(propsToProcess, lastError,props);
-// 	let backup = Object.assign({}, baseOptions);
-// 	//console.log("GRADIENTS",gradients);
-
-// 	function aStep(i) {
-// 		let newProps = incrProps(props, propsToProcess, gradients, learningRate, backup)
-// 		let err = computeError(newProps);
-// 		if(err > lastError && Math.abs((err-lastError)/lastError) > 0.1) {
-// 			learningRate /= 2.0;
-// 			return true;
-// 		}
-// 		backup = props;
-// 		props = newProps;
-// 		if(err < bestErr) {
-// 			bestErr = err;
-// 			bestOpts = Object.assign(bestOpts, props);
-// 		}
-// 		if(Math.abs(err-lastError) < 0.000001 && i > 0.25*steps) return false;
-// 		//if(i && (i%100) === 0 ) display(props);
-// 		lastError = err;
-		
-// 		gradients = computeGradients(propsToProcess,err,props);
-// 		return true;
-// 	}
-// 	let i=0;
-// 	function optGroup() {
-// 		Object.assign(baseOptions,props);
-// 		setOptionValues();
-// 		simulate();
-// 		for(let j=0; j<100; j++, i++){
-// 				  if( !aStep(i) ) { i = steps; break; }
-// 				  learningRate *= decayOfLearningRate;
-// 		}
-// 		if(i < steps) setTimeout(optGroup,0);
-// 		else {
-// 			Object.assign(baseOptions,bestOpts);
-// 			setOptionValues();
-// 			simulate();
-// 			let button =ID("optimize_button");
-// 			button.innerHTML = "Optimize Parameters";
-// 			button.disabled = false;
-// 			document.body.style.cursor = 'default';
-//       console.log("OPTIMIZED:")
-// 			console.log(JSON.stringify(bestOpts));
-// 		} 
-// 	}
-// 	optGroup();
-// }
-/*-------------------- ADAM ----------------------------- */
+/*   -------------------- ADAM OPTIMIZER ----------------------------- */
 
 class Adam {
     constructor(nparams, beta_1=0.9, beta_2=0.999, epsilon=1e-8) {
@@ -806,11 +833,21 @@ class Adam {
         this.b2t = beta_2;
         this.updates = new Array(this.nparams);
     }
+
+    init() {
+ 		for(var i= 0 ; i < this.nparams ; ++i) {
+            this.m[i]= 0; // Initialize 1st moment vector
+            this.v[i]= 0; // Initialize 2nd moment vector
+        }
+        this.t = 0; //Initialize timestep
+        this.b1t = this.beta_1;
+        this.b2t = this.beta_2;   	
+    }
     
     // g is a function that returns the gradient of the i(th) parameter
     get_update(alpha, g) { // alpha is the learning rate, g is the gradient vector (array oflength 'nparams')
         this.t += 1;
-        let updates= this.updateds
+        let updates= this.updates;
         const {m,v,b,beta_1,beta_2, b1t, b2t, epsilon, nparams} = this;
          
         for(var i= 0 ; i < nparams ; ++i) {
@@ -827,21 +864,14 @@ class Adam {
     };
 }
 
-function objToArray(list, obj) {
-	return list.map( k => obj[key]) 
-}
-
-function updateObj(list, delta, obj) {
-	return list.forEach( (k,i) => obj[key] +=  delta[i]) 
-
-}
 
 const adam = new Adam(propsToProcess.length);
 
-function computeGradientsAdam(propArray,err,props) {
+function computeGradientsAdam(propArray,err,props, ds=1) {
 	err = err || computeError(props); // base error;
 	let sum = 0;
-	let gradients = propArray.map((gradients, [name, delta, scale]) =>{
+	let gradients = propArray.map(([name, delta, scale]) =>{
+		    delta = delta*ds;
 		    let dy = scale*(computeError(props,name,delta)-err)/delta;
 		    if( dy === 0) {
 		    	dy = -(computeError(props,name,-2*delta)-err); ///(2*delta);
@@ -852,23 +882,33 @@ function computeGradientsAdam(propArray,err,props) {
 			return dy;
 	});
 
-	if(sum > err*4) {
-		let prod = err/sum;
-		for(let i=0; i< gradients.length; i++)
-		   gradients[i] *= prod*0.25;
-	}
+	// if(sum > err*4) {
+	// 	let prod = err/sum;
+	// 	for(let i=0; i< gradients.length; i++)
+	// 	   gradients[i] *= prod/propArray[2];
+	// }
+///****/	printGrads(propArray, gradients);
 	return gradients;
+}
+
+function printGrads(propArray, gradients) {
+	let str = "";
+	for(let i=0; i< gradients.length; i++) {
+		str += propArray[i][0]+': '+gradients[i]+";  ";
+	}
+	console.log(str)
 }
 
 
 function incrPropsAdam(props, propsToProcess, gradients, learningRate, backup) {
-	let updates = adam.get_update(gradients, learningRate);
+	let updates = adam.get_update(learningRate,gradients);
+///****/console.log({gradients, updates});
 	propsToProcess.forEach( ([name,step, min, max, scale],ix) => {
-			let newVal = props[name]-updates[ix];
-			//if(name === "percentRecorded") console.log("%", props[name], newVal,gradients[name],learningRate,scale);
+			let newVal = props[name]+updates[ix];
+
 			if(newVal >= min && newVal <= max)
 				backup[name] = newVal;
-			//else console.log("invalid val", name, gradients[name], newVal);
+///****/console.log(name, props[name], backup[name], updates[ix]);
 		} );
 	return backup;
 } 
@@ -876,12 +916,13 @@ function incrPropsAdam(props, propsToProcess, gradients, learningRate, backup) {
 
 
 
-/* --- END ADAM --------------------------------------- */
+/*   END----------------- ADAM OPTIMIZER ----------------------------- */
 
 
-function optimize(learningRate=0.05, learningDecay=0.999) {;
-	let gradDesc = getGradientDescent(computeGradients, incrProps);
-	
+
+function optimize(learningRate=0.01, learningDecay=0.999999) {
+	let gradDesc = getGradientDescent(computeGradientsAdam, incrPropsAdam);
+	adam.init();
 	let button = ID("optimize_button");
 			button.innerHTML = "working...";
 			button.disabled = true;
@@ -896,7 +937,8 @@ function optimize(learningRate=0.05, learningDecay=0.999) {;
 }
 
 
-/* END ---------------- Gradient descent optimization of various baseOptions  */
+/* END------- OPTIMIZER --------- Gradient descent optimization of various baseOptions  */
+/* END==================================================================================*/
 
 function adjustData(baseOptions) {
 	 if (baseOptions.becomeSpreader >= baseOptions.daysOfSickness)
@@ -920,6 +962,9 @@ window.updateData = function(name, value, scale = 1) {
 	  simulate();
 	  return baseOptions;
 	}
+
+
+/*  --------------------------------D3 VISUALIZER ------------------------------------*/	
 //official simulated showReal
 const LAB = { 
 			"Reported Infected" : "simulated" , 
@@ -1403,7 +1448,7 @@ function getInterface(interface) {
 		if(!n) return [arr];
 		let res = [];
 		for(let i=0; i<arr.length; i += n) {
-			res.push(arr.slice(i,i+n))
+			res.push(arr.slice(i,Math.min(i+n, arr.length)));
 		}
 		return res;
 	}
@@ -1434,7 +1479,7 @@ function getInterface(interface) {
 		]);
 	}
    
-	return toRows(interface,3).map( row => 
+	return toRows(interface,30).map( row => 
 				div({klass: 'row'},  () => row.map(genSlider).join("\n"))
 		).join('\n')
 }
