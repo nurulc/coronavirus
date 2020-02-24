@@ -1,6 +1,11 @@
 # CoronaVirus Modeler Updates / News
 *Nurul Choudhury* <br>
 
+
+## Update 2020-02-13
+
+Big surge in officail data from China, this is a result of changes in reporting. Previously only verified results through 
+
 ## Update 2020-02-07
 
 ## Official Count
